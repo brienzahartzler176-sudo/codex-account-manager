@@ -8,6 +8,23 @@
 ![Status](https://img.shields.io/badge/status-local--first-success)
 ![Safety](https://img.shields.io/badge/mode-manual%20only-orange)
 
+## 小白先看
+
+如果你只是想把软件用起来，不需要先学 GitHub，也不需要自己编译。
+
+普通用户建议使用已经打包好的 Windows 压缩包：
+
+1. 解压整个文件夹
+2. 双击 `Start.bat`
+3. 按界面里的按钮导入、切换、备注、刷新额度
+
+GitHub 这个仓库主要给两类人看：
+
+- 想确认工具逻辑是否干净的人
+- 想二次修改、学习或自己打包的开发者
+
+如果你不是开发者，不建议直接下载源码后硬部署。源码版缺少完整的 Windows 打包外壳，直接跑起来可能会比压缩包版本麻烦。
+
 ## 项目定位
 
 Codex Account Manager 是一个偏“个人自用”的本地管理工具。
@@ -112,7 +129,7 @@ Codex Account Manager 是一个偏“个人自用”的本地管理工具。
 
 这些数据属于用户本机数据，不应该提交到 GitHub，也不应该随意发给别人。
 
-## 快速开始
+## 开发者快速开始
 
 > 注意：当前公开仓库不包含完整 Windows 二进制外壳。
 > 如果你是普通用户，建议使用已经打包好的 Windows 压缩包。
