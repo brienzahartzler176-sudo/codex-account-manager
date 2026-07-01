@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-label="Codex Account Manager UI preview">
+  <defs>
+    <style>
+      .bg { fill: #eef3f8; }
+      .panel { fill: #ffffff; stroke: #d7e0ea; stroke-width: 1; }
+      .soft { fill: #f7faff; stroke: #e5edf5; stroke-width: 1; }
+      .line { stroke: #e5edf5; stroke-width: 1; }
+      .text { fill: #1f2937; font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif; }
+      .muted { fill: #637083; font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif; }
+      .blue { fill: #0f6bff; }
+      .green { fill: #16a34a; }
+      .orange { fill: #d97706; }
+      .red { fill: #dc2626; }
+      .btn { fill: #ffffff; stroke: #cbd8e6; stroke-width: 1; }
+      .btn-primary { fill: #0f6bff; }
+      .tag { fill: #eef5ff; stroke: #bfdbfe; stroke-width: 1; }
+      .tag-green { fill: #ecfdf5; stroke: #bbf7d0; stroke-width: 1; }
+      .tag-red { fill: #fff1f2; stroke: #fecdd3; stroke-width: 1; }
+      .small { font-size: 15px; }
+      .base { font-size: 18px; }
+      .title { font-size: 24px; font-weight: 700; }
+      .brand { font-size: 21px; font-weight: 700; }
+      .bold { font-weight: 700; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1280" height="760"/>
+  <rect class="panel" x="36" y="34" width="1208" height="692" rx="10"/>
+
+  <rect x="36" y="34" width="1208" height="72" rx="10" fill="#ffffff"/>
+  <line class="line" x1="36" y1="106" x2="1244" y2="106"/>
+  <rect class="blue" x="64" y="54" width="38" height="38" rx="8"/>
+  <text class="text bold" x="77" y="80" font-size="22" fill="#ffffff">C</text>
+  <text class="text brand" x="118" y="79">codex 账号管理器</text>
+
+  <text class="text base bold" x="445" y="79" fill="#0f6bff">账号管理</text>
+  <text class="muted base" x="558" y="79">账号备注</text>
+  <text class="muted base" x="678" y="79">软件使用说明</text>
+  <line x1="443" y1="104" x2="522" y2="104" stroke="#0f6bff" stroke-width="4" stroke-linecap="round"/>
+
+  <rect class="btn" x="975" y="53" width="96" height="38" rx="8"/>
+  <text class="text small" x="996" y="78">账号备注</text>
+  <rect class="btn-primary" x="1086" y="53" width="112" height="38" rx="8"/>
+  <text x="1113" y="78" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#ffffff">添加账号</text>
+
+  <text class="text title" x="70" y="154">账号管理</text>
+
+  <rect class="soft" x="70" y="178" width="210" height="76" rx="8"/>
+  <text class="muted small" x="92" y="210">总账号数</text>
+  <text class="text" x="92" y="239" font-size="30" font-weight="700">3</text>
+
+  <rect class="soft" x="298" y="178" width="290" height="76" rx="8"/>
+  <text class="muted small" x="320" y="210">当前账号</text>
+  <text class="text" x="320" y="238" font-size="22" font-weight="700">main@example.com</text>
+
+  <rect class="soft" x="606" y="178" width="170" height="76" rx="8"/>
+  <text class="muted small" x="628" y="210">平均 5H</text>
+  <text class="text" x="628" y="239" font-size="28" font-weight="700">59%</text>
+
+  <rect class="soft" x="794" y="178" width="170" height="76" rx="8"/>
+  <text class="muted small" x="816" y="210">平均 7D</text>
+  <text class="text" x="816" y="239" font-size="28" font-weight="700">70%</text>
+
+  <rect class="soft" x="982" y="178" width="170" height="76" rx="8"/>
+  <text class="muted small" x="1004" y="210">低额度</text>
+  <text class="orange" x="1004" y="239" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="28" font-weight="700">1</text>
+
+  <rect class="panel" x="70" y="282" width="1112" height="332" rx="8"/>
+  <rect class="soft" x="94" y="306" width="318" height="40" rx="8"/>
+  <text class="muted small" x="118" y="332">搜索账号...</text>
+  <rect class="blue" x="436" y="306" width="72" height="40" rx="8"/>
+  <text x="456" y="332" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="15" font-weight="700" fill="#ffffff">全部</text>
+  <rect class="btn" x="518" y="306" width="72" height="40" rx="8"/>
+  <text class="muted small" x="541" y="332">Plus</text>
+  <rect class="btn" x="600" y="306" width="72" height="40" rx="8"/>
+  <text class="muted small" x="624" y="332">Team</text>
+
+  <rect x="94" y="370" width="1064" height="44" fill="#f8fafc"/>
+  <text class="muted small bold" x="118" y="398">账号</text>
+  <text class="muted small bold" x="452" y="398">模型配额</text>
+  <text class="muted small bold" x="785" y="398">最近使用</text>
+  <text class="muted small bold" x="980" y="398">操作</text>
+
+  <line class="line" x1="94" y1="414" x2="1158" y2="414"/>
+  <circle class="blue" cx="122" cy="456" r="18"/>
+  <text x="115" y="463" font-family="Segoe UI, sans-serif" font-size="18" font-weight="700" fill="#ffffff">C</text>
+  <text class="text base bold" x="154" y="452">main@example.com</text>
+  <text class="muted small" x="154" y="476">昵称：main-plus</text>
+  <rect class="tag-green" x="154" y="488" width="54" height="24" rx="12"/>
+  <text class="green small" x="168" y="506">当前</text>
+  <rect class="tag" x="216" y="488" width="54" height="24" rx="12"/>
+  <text class="blue small" x="229" y="506">Plus</text>
+
+  <text class="text small bold" x="452" y="448">Codex</text>
+  <text class="muted small" x="512" y="448">可重置 2 次</text>
+  <rect x="452" y="462" width="192" height="9" rx="5" fill="#dbe7f3"/>
+  <rect class="blue" x="452" y="462" width="138" height="9" rx="5"/>
+  <text class="muted small" x="658" y="469">5H 72%</text>
+  <rect x="452" y="486" width="192" height="9" rx="5" fill="#dbe7f3"/>
+  <rect class="green" x="452" y="486" width="111" height="9" rx="5"/>
+  <text class="muted small" x="658" y="493">7D 58%</text>
+
+  <text class="text small" x="785" y="456">2026-07-01 19:30</text>
+  <text class="muted small" x="785" y="482">已放入 10 天</text>
+  <rect class="btn-primary" x="958" y="444" width="64" height="34" rx="7"/>
+  <text x="975" y="466" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#ffffff">切换</text>
+  <rect class="btn" x="1032" y="444" width="64" height="34" rx="7"/>
+  <text class="text small" x="1049" y="466">刷新</text>
+  <rect class="btn" x="1106" y="444" width="64" height="34" rx="7"/>
+  <text class="red small" x="1123" y="466">删除</text>
+
+  <line class="line" x1="94" y1="528" x2="1158" y2="528"/>
+  <circle cx="122" cy="570" r="18" fill="#64748b"/>
+  <text x="115" y="577" font-family="Segoe UI, sans-serif" font-size="18" font-weight="700" fill="#ffffff">C</text>
+  <text class="text base bold" x="154" y="566">backup@example.com</text>
+  <text class="muted small" x="154" y="590">昵称：backup-team</text>
+  <rect class="tag" x="154" y="602" width="58" height="24" rx="12"/>
+  <text class="blue small" x="167" y="620">Team</text>
+  <text class="text small bold" x="452" y="566">Codex</text>
+  <text class="muted small" x="512" y="566">可重置 1 次</text>
+  <rect x="452" y="582" width="192" height="9" rx="5" fill="#dbe7f3"/>
+  <rect class="orange" x="452" y="582" width="88" height="9" rx="5"/>
+  <text class="muted small" x="658" y="590">5H 46%</text>
+  <text class="text small" x="785" y="576">2026-07-01 18:12</text>
+  <rect class="btn-primary" x="958" y="562" width="64" height="34" rx="7"/>
+  <text x="975" y="584" font-family="Microsoft YaHei UI, Segoe UI, sans-serif" font-size="14" font-weight="700" fill="#ffffff">切换</text>
+  <rect class="btn" x="1032" y="562" width="64" height="34" rx="7"/>
+  <text class="text small" x="1049" y="584">刷新</text>
+  <rect class="btn" x="1106" y="562" width="64" height="34" rx="7"/>
+  <text class="red small" x="1123" y="584">删除</text>
+
+  <text class="muted small" x="70" y="656">共 3 个账号</text>
+  <text class="muted small" x="1044" y="656">本店入口</text>
+  <text class="muted small" x="70" y="695">界面预览使用演示数据，不包含真实账号、token 或备注。</text>
+</svg>
