@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>codex 账号管理器</title>
+  <style>
+    @media (prefers-color-scheme: dark) {
+
+      html,
+      body {
+        background: #0a0e17;
+        color: #dbe1e8;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="./css/styles.css?v=20260621-notes-file" />
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("cas_theme") || "auto";
+        var isDark = theme === "dark" || (theme === "auto" && (!window.matchMedia || window.matchMedia("(prefers-color-scheme: dark)").matches));
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        document.documentElement.style.colorScheme = isDark ? "dark" : "light";
+      } catch (e) { }
+    })();
+  </script>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="toolbar">
+      <div class="brand" id="brandTitle">codex 账号管理器</div>
+
+      <nav class="top-tabs">
+        <button class="tab-btn active" data-tab="accounts" id="tabBtnAccounts">账号管理</button>
+        <button class="tab-btn" data-tab="notes" id="tabBtnNotes">账号备注</button>
+        <button class="tab-btn" data-tab="help" id="tabBtnHelp">软件使用说明</button>
+        <button class="tab-btn" data-tab="settings" id="tabBtnSettings">设置</button>
+      </nav>
+
+      <div class="toolbar-break" aria-hidden="true"></div>
+
+      <div class="toolbar-quick" id="toolbarQuick">
+        <button class="quick-btn" id="quickThemeBtn" title="切换主题">A</button>
+        <button class="quick-btn" id="quickLangBtn" title="切换语言">ZH</button>
+        <div class="quick-menu" id="quickLangMenu"></div>
+      </div>
+
+      <div class="toolbar-break toolbar-break-actions" aria-hidden="true"></div>
+
+      <div class="toolbar-actions">
+        <button class="tool-btn" id="accountNotesBtn" type="button"><span class="btn-icon">▤</span><span>账号备注</span></button>
+        <button class="tool-btn primary" id="addAccountBtn"><span class="btn-icon">＋</span><span>添加账号</span></button>
+      </div>
+    </div>
+
+    <main class="content">
+      <section class="tab-panel active" id="tab-accounts">
+        <div class="accounts-wrap">
+          <div class="accounts-head">
+            <h2 class="accounts-title" id="accountsSectionTitle">账号管理</h2>
+          </div>
+          <div class="account-summary" id="accountSummary">
+            <div class="summary-item">
+              <span class="summary-label" id="summaryTotalLabel">总账号数</span>
+              <strong class="summary-value" id="summaryTotalValue">0</strong>
+            </div>
+            <div class="summary-item summary-item-current">
+              <span class="summary-label" id="summaryCurrentLabel">当前账号</span>
+              <strong class="summary-value" id="summaryCurrentValue">-</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label" id="summaryAvg5Label">平均 5H</span>
+              <strong class="summary-value" id="summaryAvg5Value">-</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label" id="summaryAvg7Label">平均 7D</span>
+              <strong class="summary-value" id="summaryAvg7Value">-</strong>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label" id="summaryLowLabel">低额度</span>
+              <strong class="summary-value" id="summaryLowValue">0</strong>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-toolbar">
+              <label class="search-shell" for="searchInput">
+                <span class="search-icon">⌕</span>
+                <input class="search" id="searchInput" placeholder="搜索账号..." />
+              </label>
+              <div class="group-filter">
+                <button class="group-btn active" data-group-filter="all" id="groupAllBtn">全部</button>
+                <button class="group-btn" data-group-filter="free" id="groupFreeBtn">Free</button>
+                <button class="group-btn" data-group-filter="plus" id="groupPlusBtn">Plus</button>
+                <button class="group-btn" data-group-filter="team" id="groupTeamBtn">Team</button>
+                <button class="group-btn" data-group-filter="pro" id="groupProBtn">Pro</button>
+              </div>
+            </div>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th style="width: 28%;" id="thAccount">账号</th>
+                  <th style="width: 26%;" id="thQuota">模型配额</th>
+                  <th style="width: 16%;" id="thRecent">最近使用</th>
+                  <th style="width: 30%;" id="thAction">操作</th>
+                </tr>
+              </thead>
+              <tbody id="accountsBody"></tbody>
+            </table>
+          </div>
+          <div class="table-pagination" id="accountsPagination">
+            <button class="mini" id="accountsPrevPageBtn" type="button">上一页</button>
+            <span class="page-info" id="accountsPageInfo">第 1 / 1 页，每页 20 个</span>
+            <button class="mini" id="accountsNextPageBtn" type="button">下一页</button>
+          </div>
+
+          <div id="log">WebUI ready.</div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-notes">
+        <div class="notes-wrap">
+          <div class="account-notes-panel account-notes-workspace" id="accountNotesPanel">
+            <div class="account-notes-panel-head">
+              <div>
+                <div class="account-notes-panel-title">账号备注</div>
+                <div class="account-notes-panel-sub">每个邮箱一张备注卡。备注只保存在本机，不参与登录、切换或刷新。</div>
+              </div>
+              <div class="account-notes-panel-actions">
+                <button class="mini primary" id="accountNotesAddBtn" type="button">新增备注</button>
+                <button class="mini" id="accountNotesBatchImportBtn" type="button">批量导入</button>
+                <button class="mini" id="accountNotesCollapseBtn" type="button">返回账号管理</button>
+              </div>
+            </div>
+            <div class="account-notes-tools">
+              <label class="search-shell account-notes-search-shell" for="accountNotesSearchInput">
+                <span class="search-icon">⌕</span>
+                <input class="search" id="accountNotesSearchInput" placeholder="搜索邮箱或备注..." autocomplete="off" />
+              </label>
+              <button class="mini" id="accountNotesClearSearchBtn" type="button">清空</button>
+            </div>
+            <div class="account-notes-editor-host" id="accountNotesEditorHost" hidden></div>
+            <div class="account-notes-list" id="accountNotesList"></div>
+            <div class="account-notes-foot" id="accountNotesStatus">账号备注保存在 CAS data/account-notes.json。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-help">
+        <div class="help-wrap">
+          <div class="help-panel">
+            <h2 class="help-title" id="helpTitle">软件使用说明</h2>
+            <div class="help-list">
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepAddTitle">这个工具怎么用</div>
+                <div class="help-item-text" id="helpStepAddText">这个工具只做本地账号管理：保存你导入过的 Codex 登录备份、显示你手动刷新过的额度、按你点击的按钮切换账号。新增账号时先点“准备登录新账号”。CAS 最终只看 Codex 写出的 auth.json，不看浏览器里登录了几个账号。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepSwitchTitle">切换账号</div>
+                <div class="help-item-text" id="helpStepSwitchText">在账号列表里找到要用的邮箱，点右侧“切换”。确认后会把本机 Codex 登录状态换成这个账号，并自动重启 Codex。切换前先停下正在跑的任务，不要多个账号同时跑同一批任务。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepLogoutTitle">不要在 Codex 里退出账号</div>
+                <div class="help-item-text" id="helpStepLogoutText">这个号以后还要给 CAS 管，就别在 Codex 设置里点退出。退出可能让旧登录凭证失效，CAS 再切回来就会显示异常。新增账号时走“准备登录新账号”。如果默认浏览器打开了错号，可以把 OAuth 登录页地址复制到正确浏览器/Profile 里登录；只要 Codex 最后登录成功，CAS 就能导入。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepSafetyTitle">安全边界</div>
+                <div class="help-item-text" id="helpStepSafetyText">这里只保留手动操作：手动导入、手动切换、手动刷新单个账号。不做反代、不改代理、不自动轮换、不低额度自动换号，也不并发多号跑同一批任务。不要把 CAS 当账号池用，账号多时更要降低登录、切换和刷新频率。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepQuotaTitle">查看额度</div>
+                <div class="help-item-text" id="helpStepQuotaText">每个账号的“模型配额”里有 5H 和 7D 两条血条。它只显示上次手动刷新后的结果，不会在后台自动刷。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepRefreshTitle">刷新额度</div>
+                <div class="help-item-text" id="helpStepRefreshText">想看某个号的最新额度，就只点那一行的“刷新”。不要频繁连续刷，也不要多个号一起刷。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepNotesTitle">账号备注</div>
+                <div class="help-item-text" id="helpStepNotesText">点“账号备注”会进入单独的备注页面。每个邮箱一张本地备注卡，可以放登录线索、手机号、密钥提示，不参与登录、切换或刷新。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepDeleteTitle">删除账号</div>
+                <div class="help-item-text" id="helpStepDeleteText">不用的账号可以点“删除”，删除前会再问你一次，防止误删。</div>
+              </div>
+              <div class="help-item">
+                <div class="help-item-title" id="helpStepSupportTitle">制作与售后</div>
+                <div class="help-item-text" id="helpStepSupportText">本工具由本店提供，售后与更新入口： <a class="support-link" id="helpStepSupportLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">https://pay.ldxp.cn/shop/340</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-settings">
+        <div class="settings-wrap">
+          <div class="settings-card">
+            <div class="settings-title" id="settingsTitle">轻量设置</div>
+            <div class="settings-sub" id="settingsSub">只保留日常使用需要的基础选项。</div>
+
+            <div class="settings-group">
+              <div class="settings-label" id="settingsLanguageLabel">语言</div>
+              <div class="option-row" id="languageOptions"></div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-label" id="settingsThemeLabel">主题</div>
+              <div class="option-row" id="themeOptions">
+                <button class="option-btn active" data-theme-option="auto" id="themeAutoBtn">自动</button>
+                <button class="option-btn" data-theme-option="light" id="themeLightBtn">浅色</button>
+                <button class="option-btn" data-theme-option="dark" id="themeDarkBtn">深色</button>
+              </div>
+              <div class="settings-sub-note" id="settingsThemeHint">自动模式会跟随 Windows 主题。</div>
+            </div>
+
+            <div class="settings-group">
+              <div class="settings-label" id="settingsCloseBehaviorLabel">关闭按钮行为</div>
+              <div class="option-row" id="closeBehaviorOptions">
+                <button class="option-btn active" data-close-behavior-option="tray" id="closeBehaviorTrayBtn">进入后台</button>
+                <button class="option-btn" data-close-behavior-option="exit" id="closeBehaviorExitBtn">直接关闭</button>
+              </div>
+              <div class="settings-sub-note" id="settingsCloseBehaviorHint">选择点击窗口右上角关闭按钮时，是进入后台托盘还是直接退出。</div>
+            </div>
+
+            <div class="settings-section-title" id="settingsTabVisibilitySectionTitle">页面显示</div>
+            <div class="settings-sub-note" id="settingsTabVisibilitySectionHint">只控制轻量版保留的页面；设置页始终显示。</div>
+            <div id="settingsTabVisibilityList"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div id="countText"></div>
+      <a class="footer-credit" id="footerShopLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">本店入口</a>
+    </footer>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <div class="modal-mask" id="confirmModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="modal-head" id="confirmTitle">请确认</div>
+      <div class="modal-body">
+        <div class="modal-label" id="confirmMessage">确认执行此操作吗？</div>
+      </div>
+      <div class="modal-actions">
+        <button class="mini" id="confirmCancelBtn">取消</button>
+        <button class="mini primary" id="confirmOkBtn">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="renameModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
+      <div class="modal-head" id="renameTitle">重命名账号</div>
+      <div class="modal-body">
+        <div>
+          <div class="modal-label" id="renameNameLabel">新账号名</div>
+          <input class="modal-input" id="renameNameInput" maxlength="64" autocomplete="off" placeholder="请输入新账号名" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="mini" id="renameCancelBtn">取消</button>
+        <button class="mini primary" id="renameConfirmBtn">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="addAccountModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addAccountTitle">
+      <div class="modal-head" id="addAccountTitle">添加 Codex 新账号</div>
+      <div class="modal-body">
+        <div class="add-account-pane active">
+          <div class="add-account-guidance" id="addAccountGuidance">
+            <div class="add-account-guidance-title" id="addAccountGuidanceTitle">新增账号提醒</div>
+            <div class="add-account-guidance-text" id="addAccountGuidanceText">CAS 只导入 Codex 最后写出的 auth.json。</div>
+          </div>
+          <div class="add-account-desc" id="addPaneNewLoginDesc">CAS 会先保护当前 Codex 登录文件，再重新打开 Codex 登录流程。默认浏览器如果还是旧账号，请先切换 Windows 默认浏览器或浏览器 Profile。</div>
+          <button class="tool-btn primary add-account-action-btn" id="addAccountPrepareNewBtn" type="button">开始添加新账号</button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="mini" id="addAccountCancelBtn">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/account-notes-seed.js"></script>
+  <script src="./js/app.js?v=20260621-notes-protect"></script>
+</body>
+
+</html>

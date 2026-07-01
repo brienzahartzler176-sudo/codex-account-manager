@@ -1,0 +1,1 @@
+window.CAS_ACCOUNT_NOTES_SEED = "";
