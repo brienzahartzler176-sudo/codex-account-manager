@@ -350,7 +350,7 @@ function Get-QuotaResetCountFromAuth {
       return [Math]::Max(0, $count)
     }
   }
-  return 0
+  throw "reset_count_unavailable"
 }
 
 function Test-AccountMatchesRequest {
@@ -539,33 +539,67 @@ function Apply-CachedUsageToAccount {
   Set-JsonProp $Account "usageOk" ($windows.Count -gt 0)
 }
 
+function Apply-CachedResetCountToAccount {
+  param(
+    [Parameter(Mandatory = $true)]$Account,
+    [Parameter(Mandatory = $true)]$Cached
+  )
+
+  $count = $Cached
+  $updatedAt = ""
+  if ($null -ne $Cached -and ($Cached.PSObject.Properties.Name -contains "availableCount")) {
+    $count = $Cached.availableCount
+    $updatedAt = ([string]$Cached.updatedAt).Trim()
+  }
+
+  $parsedCount = 0
+  if ($null -eq $count -or -not [int]::TryParse([string]$count, [ref]$parsedCount) -or $parsedCount -lt 0) {
+    return $false
+  }
+
+  Set-JsonProp $Account "quotaResetAvailableCount" $parsedCount
+  if (-not [string]::IsNullOrWhiteSpace($updatedAt)) {
+    Set-JsonProp $Account "quotaResetCountUpdatedAt" $updatedAt
+  }
+  return $true
+}
+
 function Restore-CachedUsageToIndex {
-  if (-not (Test-Path -LiteralPath $indexPath) -or -not (Test-Path -LiteralPath $quotaWindowCachePath)) { return }
+  if (-not (Test-Path -LiteralPath $indexPath)) { return }
+  if (-not (Test-Path -LiteralPath $quotaWindowCachePath) -and -not (Test-Path -LiteralPath $quotaResetCountCachePath)) { return }
 
   $index = Read-JsonObject $indexPath
   $quotaWindowCache = Read-JsonObject $quotaWindowCachePath
+  $quotaResetCountCache = Read-JsonObject $quotaResetCountCachePath
   $accounts = @()
-  $restored = 0
+  $usageRestored = 0
+  $resetCountRestored = 0
   foreach ($account in @($index.accounts)) {
     if ($null -eq $account) { continue }
     $key = Get-AccountEmailKey $account
     if (-not [string]::IsNullOrWhiteSpace($key) -and ($quotaWindowCache.PSObject.Properties.Name -contains $key)) {
       Apply-CachedUsageToAccount -Account $account -Cached $quotaWindowCache.$key
-      $restored++
+      $usageRestored++
+    }
+    if (-not [string]::IsNullOrWhiteSpace($key) -and ($quotaResetCountCache.PSObject.Properties.Name -contains $key)) {
+      if (Apply-CachedResetCountToAccount -Account $account -Cached $quotaResetCountCache.$key) {
+        $resetCountRestored++
+      }
     }
     $accounts += $account
   }
 
-  if ($restored -gt 0) {
+  if ($usageRestored -gt 0 -or $resetCountRestored -gt 0) {
     Set-JsonProp $index "accounts" $accounts
     Write-JsonObject -Path $indexPath -Object $index
-    Write-MetaLog ("restored cached usage for {0} account(s) before app startup" -f $restored)
+    Write-MetaLog ("restored cached usage for {0} account(s) and reset counts for {1} account(s) before app startup" -f $usageRestored, $resetCountRestored)
   }
 }
 
 function Build-AccountsPayload {
   $index = Read-JsonObject $indexPath
   $quotaWindowCache = Read-JsonObject $quotaWindowCachePath
+  $quotaResetCountCache = Read-JsonObject $quotaResetCountCachePath
   $accounts = @()
   foreach ($account in @($index.accounts)) {
     if ($null -ne $account) {
@@ -573,6 +607,9 @@ function Build-AccountsPayload {
       $key = Get-AccountEmailKey $account
       if (-not [string]::IsNullOrWhiteSpace($key) -and ($quotaWindowCache.PSObject.Properties.Name -contains $key)) {
         Apply-CachedUsageToAccount -Account $account -Cached $quotaWindowCache.$key
+      }
+      if (-not [string]::IsNullOrWhiteSpace($key) -and ($quotaResetCountCache.PSObject.Properties.Name -contains $key)) {
+        [void](Apply-CachedResetCountToAccount -Account $account -Cached $quotaResetCountCache.$key)
       }
       $accounts += $account
     }

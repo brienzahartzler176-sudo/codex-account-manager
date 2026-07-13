@@ -205,8 +205,6 @@ function Apply-UsageResultToEntry {
   Set-JsonProp $Entry "quota7dWindowSeconds" ([int64]$Usage.w7s)
   if ([int]$Usage.resetAvailableCount -ge 0) {
     Set-JsonProp $Entry "quotaResetAvailableCount" ([int]$Usage.resetAvailableCount)
-  } else {
-    Set-JsonProp $Entry "quotaResetAvailableCount" 0
   }
 }
 
