@@ -8,6 +8,12 @@
 ![Status](https://img.shields.io/badge/status-local--first-success)
 ![Safety](https://img.shields.io/badge/mode-manual%20only-orange)
 
+## 下载最新版
+
+普通用户请从 [GitHub Releases](https://github.com/brienzahartzler176-sudo/codex-account-manager/releases) 下载 `codex-account-manager-windows.zip`，不要从源码页单独下载零散文件。
+
+更新时先退出管理器，再把新压缩包覆盖解压到原软件目录。务必保留原来的 `data` 目录，账号备份、备注和本地数据都保存在里面。
+
 ## 小白先看
 
 如果你只是想把软件用起来，不需要先学 GitHub，也不需要自己编译。
@@ -64,8 +70,9 @@ Codex Account Manager 是一个偏“个人自用”的本地管理工具。
 - **手动切换**：只在用户明确点击后切换账号，不做后台静默轮换。
 - **账号备份**：保存已导入过的 Codex 登录状态，减少手动管理文件的麻烦。
 - **账号备注**：为不同邮箱记录本地备注，方便区分用途、线索和状态。
-- **额度查看**：支持手动刷新 5H / 7D 额度，并显示可重置次数。
+- **额度查看**：按 Codex 当前返回的时间窗口动态显示额度、重置倒计时和可重置次数，官方恢复 5H 时也会自动适配。
 - **异常提示**：当账号登录状态失效时，提示重新登录并更新本地凭证。
+- **更新入口**：软件帮助页和底部提供 GitHub Releases 入口，方便下载最新版。
 - **轻量界面**：Web UI + 本地脚本，适合 Windows 免安装压缩包形态。
 
 ## 和自动切换工具的区别
@@ -112,6 +119,7 @@ Codex Account Manager 是一个偏“个人自用”的本地管理工具。
 ├─ webui/                         # 前端界面
 ├─ advanced/                      # 高级辅助入口脚本
 ├─ codex-shim/CodeShim.cs         # Codex 启动辅助源码
+├─ docs/images/                   # 公开说明图片
 ├─ data/.gitkeep                  # 空数据目录占位
 ├─ Start.bat                      # Windows 启动入口
 ├─ start-cas-safe.cmd             # 安全启动脚本
@@ -133,7 +141,7 @@ Codex Account Manager 是一个偏“个人自用”的本地管理工具。
 - token、邮箱备注、登录缓存
 - 日志、pid、临时文件
 - WebView2 用户数据
-- Windows 二进制发布包
+- Git 仓库中的 Windows 二进制文件（可发布版本放在 GitHub Releases）
 - `.exe`、`.dll`、`.zip` 等构建产物
 
 公开目录由生成脚本整理而来，并配有 `.gitignore` 防止常见敏感文件被误提交。
@@ -186,7 +194,7 @@ Start.bat
 
 ## 开发说明
 
-公开源码目录由主工作目录生成：
+维护者从主工作目录生成公开源码目录：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\Build-GitHubPublic.ps1

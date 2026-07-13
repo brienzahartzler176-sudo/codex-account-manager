@@ -3,6 +3,9 @@ param(
   [switch]$NoUsage,
   [switch]$ClearAbnormal,
   [switch]$CleanupOnly,
+  [switch]$RefreshStoredAccount,
+  [string]$AccountName,
+  [string]$AccountGroup,
   [string]$AuthPath
 )
 
@@ -80,6 +83,9 @@ function Get-UsageFromAuth {
     r7s = -1
     r5 = -1
     r7 = -1
+    w5s = -1
+    w7s = -1
+    windows = @()
     resetAvailableCount = -1
     status = $null
     error = ""
@@ -100,17 +106,54 @@ function Get-UsageFromAuth {
     $response = Invoke-WebRequest -Uri "https://chatgpt.com/backend-api/wham/usage" -Headers $headers -Method GET -TimeoutSec 20
     $result.status = [int]$response.StatusCode
     $payload = $response.Content | ConvertFrom-Json
-    $primary = $payload.rate_limit.primary_window
-    $secondary = $payload.rate_limit.secondary_window
+    $windows = @()
+    foreach ($slot in @(
+      [pscustomobject]@{ name = "primary"; value = $payload.rate_limit.primary_window },
+      [pscustomobject]@{ name = "secondary"; value = $payload.rate_limit.secondary_window }
+    )) {
+      $window = $slot.value
+      if ($null -eq $window) { continue }
+
+      $usedPercent = -1
+      $remainingPercent = -1
+      $windowSeconds = -1L
+      $resetAfterSeconds = -1L
+      $resetAt = -1L
+      if ($null -ne $window.used_percent) {
+        $usedPercent = [Math]::Max(0, [Math]::Min(100, [int][Math]::Round([double]$window.used_percent)))
+        $remainingPercent = 100 - $usedPercent
+      }
+      if ($null -ne $window.limit_window_seconds) { $windowSeconds = [int64]$window.limit_window_seconds }
+      if ($null -ne $window.reset_after_seconds) { $resetAfterSeconds = [int64]$window.reset_after_seconds }
+      if ($null -ne $window.reset_at) { $resetAt = [int64]$window.reset_at }
+
+      $windows += [pscustomobject][ordered]@{
+        slot = [string]$slot.name
+        windowSeconds = $windowSeconds
+        remainingPercent = $remainingPercent
+        resetAfterSeconds = $resetAfterSeconds
+        resetAt = $resetAt
+      }
+    }
+
+    $shortWindow = @($windows | Where-Object { [int64]$_.windowSeconds -gt 0 -and [int64]$_.windowSeconds -le 86400 } | Sort-Object windowSeconds | Select-Object -First 1)
+    $longWindow = @($windows | Where-Object { [int64]$_.windowSeconds -gt 86400 } | Sort-Object @{ Expression = { [Math]::Abs([double]$_.windowSeconds - 604800) } } | Select-Object -First 1)
+    if ($shortWindow.Count -gt 0) {
+      $result.q5 = [int]$shortWindow[0].remainingPercent
+      $result.r5s = [int64]$shortWindow[0].resetAfterSeconds
+      $result.r5 = [int64]$shortWindow[0].resetAt
+      $result.w5s = [int64]$shortWindow[0].windowSeconds
+    }
+    if ($longWindow.Count -gt 0) {
+      $result.q7 = [int]$longWindow[0].remainingPercent
+      $result.r7s = [int64]$longWindow[0].resetAfterSeconds
+      $result.r7 = [int64]$longWindow[0].resetAt
+      $result.w7s = [int64]$longWindow[0].windowSeconds
+    }
 
     $result.ok = $true
     $result.planType = [string]$payload.plan_type
-    if ($null -ne $primary.used_percent) { $result.q5 = [Math]::Max(0, 100 - [int]$primary.used_percent) }
-    if ($null -ne $secondary.used_percent) { $result.q7 = [Math]::Max(0, 100 - [int]$secondary.used_percent) }
-    if ($null -ne $primary.reset_after_seconds) { $result.r5s = [int64]$primary.reset_after_seconds }
-    if ($null -ne $secondary.reset_after_seconds) { $result.r7s = [int64]$secondary.reset_after_seconds }
-    if ($null -ne $primary.reset_at) { $result.r5 = [int64]$primary.reset_at }
-    if ($null -ne $secondary.reset_at) { $result.r7 = [int64]$secondary.reset_at }
+    $result.windows = @($windows)
     if ($null -ne $payload.rate_limit_reset_credits -and $null -ne $payload.rate_limit_reset_credits.available_count) {
       $resetCount = 0
       if ([int]::TryParse([string]$payload.rate_limit_reset_credits.available_count, [ref]$resetCount)) {
@@ -123,6 +166,73 @@ function Get-UsageFromAuth {
   }
 
   [pscustomobject]$result
+}
+
+function Clear-UsageFields {
+  param([Parameter(Mandatory = $true)]$Entry)
+  Set-JsonProp $Entry "usageOk" $false
+  Set-JsonProp $Entry "quotaWindows" @()
+  Set-JsonProp $Entry "quota5hRemainingPercent" -1
+  Set-JsonProp $Entry "quota7dRemainingPercent" -1
+  Set-JsonProp $Entry "quota5hResetAfterSeconds" -1
+  Set-JsonProp $Entry "quota7dResetAfterSeconds" -1
+  Set-JsonProp $Entry "quota5hResetAt" -1
+  Set-JsonProp $Entry "quota7dResetAt" -1
+  Set-JsonProp $Entry "quota5hWindowSeconds" -1
+  Set-JsonProp $Entry "quota7dWindowSeconds" -1
+  Remove-JsonProp $Entry "quotaResetAvailableCount"
+}
+
+function Apply-UsageResultToEntry {
+  param(
+    [Parameter(Mandatory = $true)]$Entry,
+    [Parameter(Mandatory = $true)]$Usage
+  )
+  Set-JsonProp $Entry "abnormal" $false
+  Set-JsonProp $Entry "abnormalReason" ""
+  Set-JsonProp $Entry "abnormalAt" ""
+  Set-JsonProp $Entry "usageOk" $true
+  Set-JsonProp $Entry "usageError" ""
+  Set-JsonProp $Entry "planType" ([string]$Usage.planType)
+  Set-JsonProp $Entry "quotaWindows" @($Usage.windows)
+  Set-JsonProp $Entry "quota5hRemainingPercent" ([int]$Usage.q5)
+  Set-JsonProp $Entry "quota7dRemainingPercent" ([int]$Usage.q7)
+  Set-JsonProp $Entry "quota5hResetAfterSeconds" ([int64]$Usage.r5s)
+  Set-JsonProp $Entry "quota7dResetAfterSeconds" ([int64]$Usage.r7s)
+  Set-JsonProp $Entry "quota5hResetAt" ([int64]$Usage.r5)
+  Set-JsonProp $Entry "quota7dResetAt" ([int64]$Usage.r7)
+  Set-JsonProp $Entry "quota5hWindowSeconds" ([int64]$Usage.w5s)
+  Set-JsonProp $Entry "quota7dWindowSeconds" ([int64]$Usage.w7s)
+  if ([int]$Usage.resetAvailableCount -ge 0) {
+    Set-JsonProp $Entry "quotaResetAvailableCount" ([int]$Usage.resetAvailableCount)
+  } else {
+    Set-JsonProp $Entry "quotaResetAvailableCount" 0
+  }
+}
+
+function Update-QuotaWindowCache {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Key,
+    $Usage
+  )
+  if ([string]::IsNullOrWhiteSpace($Key)) { return }
+  $cache = [pscustomobject]@{}
+  if (Test-Path -LiteralPath $Path) {
+    try { $cache = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $cache = [pscustomobject]@{} }
+  }
+  $normalizedKey = $Key.Trim().ToLowerInvariant()
+  if ($null -ne $Usage -and $Usage.ok) {
+    Set-JsonProp $cache $normalizedKey ([pscustomobject][ordered]@{
+      planType = [string]$Usage.planType
+      windows = @($Usage.windows)
+      resetAvailableCount = [int]$Usage.resetAvailableCount
+      updatedAt = (Get-Date -Format "yyyy/MM/dd HH:mm:ss")
+    })
+  } else {
+    Remove-JsonProp $cache $normalizedKey
+  }
+  Write-Utf8NoBomFile -Path $Path -Text ($cache | ConvertTo-Json -Depth 12)
 }
 
 function Set-JsonProp {
@@ -472,6 +582,7 @@ try {
   $backupRoot = Join-Path $dataRoot "backups"
   $indexPath = Join-Path $backupRoot "index.json"
   $configPath = Join-Path $dataRoot "config.json"
+  $quotaWindowCachePath = Join-Path $dataRoot "quota-window-cache.json"
   $codexAuth = if ([string]::IsNullOrWhiteSpace($AuthPath)) {
     Join-Path $HOME ".codex\auth.json"
   } else {
@@ -481,6 +592,72 @@ try {
   New-Item -ItemType Directory -Force -Path $dataRoot | Out-Null
   Save-MinimalConfig -ConfigPath $configPath
   Normalize-CasIndexFile -IndexPath $indexPath -DataRoot $dataRoot -BackupRoot $backupRoot
+
+  if ($RefreshStoredAccount) {
+    if ([string]::IsNullOrWhiteSpace($AccountName)) {
+      Write-Info "Stored account refresh requires AccountName."
+      exit 12
+    }
+    if (-not (Test-Path -LiteralPath $indexPath)) {
+      Write-Info "CAS account index is missing."
+      exit 12
+    }
+
+    $index = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+    $indexAccounts = Normalize-AccountList @($index.accounts)
+    $needle = $AccountName.Trim().ToLowerInvariant()
+    $groupNeedle = $AccountGroup.Trim().ToLowerInvariant()
+    $target = @($indexAccounts | Where-Object {
+      $nameMatch = (([string]$_.name).Trim().ToLowerInvariant() -eq $needle) -or
+        (([string]$_.email).Trim().ToLowerInvariant() -eq $needle)
+      $groupMatch = [string]::IsNullOrWhiteSpace($groupNeedle) -or (([string]$_.group).Trim().ToLowerInvariant() -eq $groupNeedle)
+      $nameMatch -and $groupMatch
+    } | Select-Object -First 1)
+    if ($target.Count -eq 0) {
+      Write-Info "Stored account was not found."
+      exit 12
+    }
+
+    $relativeAuthPath = ([string]$target[0].path).Trim().Replace("/", [IO.Path]::DirectorySeparatorChar)
+    if ([string]::IsNullOrWhiteSpace($relativeAuthPath)) {
+      Write-Info "Stored account auth path is missing."
+      exit 12
+    }
+    $storedAuthPath = [IO.Path]::GetFullPath((Join-Path $dataRoot $relativeAuthPath))
+    $allowedBackupRoot = [IO.Path]::GetFullPath($backupRoot).TrimEnd("\") + "\"
+    if (-not $storedAuthPath.StartsWith($allowedBackupRoot, [StringComparison]::OrdinalIgnoreCase)) {
+      Write-Info "Stored account auth path is outside the backup directory."
+      exit 12
+    }
+    if (-not (Test-Path -LiteralPath $storedAuthPath)) {
+      Write-Info "Stored account auth file is missing."
+      exit 12
+    }
+
+    $storedAuth = Get-Content -LiteralPath $storedAuthPath -Raw | ConvertFrom-Json
+    $storedUsage = Get-UsageFromAuth $storedAuth
+    $storedKey = if (-not [string]::IsNullOrWhiteSpace([string]$target[0].email)) { [string]$target[0].email } else { [string]$target[0].name }
+    Set-JsonProp $target[0] "updatedAt" (Get-Date -Format "yyyy/MM/dd HH:mm")
+    if ($storedUsage.ok) {
+      Apply-UsageResultToEntry -Entry $target[0] -Usage $storedUsage
+      Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $storedKey -Usage $storedUsage
+    } elseif ([int]$storedUsage.status -eq 401) {
+      Set-JsonProp $target[0] "abnormal" $true
+      Set-JsonProp $target[0] "abnormalReason" "usage_refresh_failed"
+      Set-JsonProp $target[0] "abnormalAt" (Get-Date -Format "yyyy/MM/dd HH:mm")
+      Set-JsonProp $target[0] "usageError" "auth_expired"
+      Clear-UsageFields -Entry $target[0]
+      Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $storedKey -Usage $null
+    } else {
+      Set-JsonProp $target[0] "usageError" ([string]$storedUsage.error)
+    }
+
+    Set-JsonProp $index "accounts" @($indexAccounts)
+    Write-Utf8NoBomFile -Path $indexPath -Text ($index | ConvertTo-Json -Depth 12)
+    if ($storedUsage.ok) { exit 0 }
+    if ([int]$storedUsage.status -eq 401) { exit 10 }
+    exit 11
+  }
 
   if ($CleanupOnly) {
     Write-Info "CAS account index cleanup finished."
@@ -500,7 +677,7 @@ try {
   }
 
   $usage = if ($NoUsage) {
-    [pscustomobject]@{ ok = $false; planType = ""; q5 = -1; q7 = -1; r5s = -1; r7s = -1; r5 = -1; r7 = -1; resetAvailableCount = -1; status = $null; error = "usage_skipped" }
+    [pscustomobject]@{ ok = $false; planType = ""; q5 = -1; q7 = -1; r5s = -1; r7s = -1; r5 = -1; r7 = -1; w5s = -1; w7s = -1; windows = @(); resetAvailableCount = -1; status = $null; error = "usage_skipped" }
   } else {
     Get-UsageFromAuth $auth
   }
@@ -580,34 +757,15 @@ try {
   Set-JsonProp $entry "firstAddedAt" $firstAddedAt
 
   if ($usage.ok) {
-    Set-JsonProp $entry "abnormal" $false
-    Set-JsonProp $entry "abnormalReason" ""
-    Set-JsonProp $entry "abnormalAt" ""
-    Set-JsonProp $entry "usageOk" $true
-    Set-JsonProp $entry "planType" ([string]$usage.planType)
-    Set-JsonProp $entry "quota5hRemainingPercent" ([int]$usage.q5)
-    Set-JsonProp $entry "quota7dRemainingPercent" ([int]$usage.q7)
-    Set-JsonProp $entry "quota5hResetAfterSeconds" ([int64]$usage.r5s)
-    Set-JsonProp $entry "quota7dResetAfterSeconds" ([int64]$usage.r7s)
-    Set-JsonProp $entry "quota5hResetAt" ([int64]$usage.r5)
-    Set-JsonProp $entry "quota7dResetAt" ([int64]$usage.r7)
-    if ([int]$usage.resetAvailableCount -ge 0) {
-      Set-JsonProp $entry "quotaResetAvailableCount" ([int]$usage.resetAvailableCount)
-    } else {
-      Set-JsonProp $entry "quotaResetAvailableCount" 0
-    }
+    Apply-UsageResultToEntry -Entry $entry -Usage $usage
+    Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $canonicalEmail -Usage $usage
   } elseif (-not $NoUsage -and [int]$usage.status -eq 401) {
     Set-JsonProp $entry "abnormal" $true
     Set-JsonProp $entry "abnormalReason" "usage_refresh_failed"
     Set-JsonProp $entry "abnormalAt" (Get-Date -Format "yyyy/MM/dd HH:mm")
-    Set-JsonProp $entry "usageOk" $false
-    Set-JsonProp $entry "quota5hRemainingPercent" -1
-    Set-JsonProp $entry "quota7dRemainingPercent" -1
-    Set-JsonProp $entry "quota5hResetAfterSeconds" -1
-    Set-JsonProp $entry "quota7dResetAfterSeconds" -1
-    Set-JsonProp $entry "quota5hResetAt" -1
-    Set-JsonProp $entry "quota7dResetAt" -1
-    Remove-JsonProp $entry "quotaResetAvailableCount"
+    Set-JsonProp $entry "usageError" "auth_expired"
+    Clear-UsageFields -Entry $entry
+    Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $canonicalEmail -Usage $null
   } elseif ($NoUsage) {
     if ($ClearAbnormal -or $existing.Count -eq 0) {
       Set-JsonProp $entry "abnormal" $false
@@ -615,28 +773,15 @@ try {
       Set-JsonProp $entry "abnormalAt" ""
     }
     if ($existing.Count -eq 0) {
-      Set-JsonProp $entry "usageOk" $false
       Set-JsonProp $entry "planType" ""
-      Set-JsonProp $entry "quota5hRemainingPercent" -1
-      Set-JsonProp $entry "quota7dRemainingPercent" -1
-      Set-JsonProp $entry "quota5hResetAfterSeconds" -1
-      Set-JsonProp $entry "quota7dResetAfterSeconds" -1
-      Set-JsonProp $entry "quota5hResetAt" -1
-      Set-JsonProp $entry "quota7dResetAt" -1
+      Clear-UsageFields -Entry $entry
     }
   } elseif ($existing.Count -eq 0) {
     Set-JsonProp $entry "abnormal" $false
     Set-JsonProp $entry "abnormalReason" ""
     Set-JsonProp $entry "abnormalAt" ""
-    Set-JsonProp $entry "usageOk" $false
     Set-JsonProp $entry "planType" ""
-    Set-JsonProp $entry "quota5hRemainingPercent" -1
-    Set-JsonProp $entry "quota7dRemainingPercent" -1
-    Set-JsonProp $entry "quota5hResetAfterSeconds" -1
-    Set-JsonProp $entry "quota7dResetAfterSeconds" -1
-    Set-JsonProp $entry "quota5hResetAt" -1
-    Set-JsonProp $entry "quota7dResetAt" -1
-    Remove-JsonProp $entry "quotaResetAvailableCount"
+    Clear-UsageFields -Entry $entry
   }
 
   Set-JsonProp $index "current" ([pscustomobject]@{ name = $safeName; group = $group })
@@ -650,7 +795,8 @@ try {
   Save-MinimalConfig -ConfigPath $configPath -LastAccount $safeName -LastGroup $group -LastAt (Get-Date -Format "yyyy/MM/dd HH:mm")
 
   if ($usage.ok) {
-    Write-Info ("Synced current Codex auth to CAS: {0} ({1}) 5H={2}% 7D={3}%" -f $email, $group, $usage.q5, $usage.q7)
+    $windowSummary = (@($usage.windows) | ForEach-Object { "{0}s={1}%" -f $_.windowSeconds, $_.remainingPercent }) -join ", "
+    Write-Info ("Synced current Codex auth to CAS: {0} ({1}) windows: {2}" -f $email, $group, $windowSummary)
   } else {
     Write-Info ("Synced current Codex auth to CAS: {0} ({1}); usage check failed: {2}" -f $email, $group, $usage.error)
   }

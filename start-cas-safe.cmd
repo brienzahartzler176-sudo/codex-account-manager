@@ -15,6 +15,7 @@ del "%~dp0data\cas-auth-watcher.pid" >nul 2>nul
 del "%~dp0data\cas-metadata-server.pid" >nul 2>nul
 timeout /t 1 /nobreak >nul 2>nul
 start "" /MIN powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0Start-CAS-Metadata-Server.ps1" >nul 2>nul
+timeout /t 1 /nobreak >nul 2>nul
 start "" "%~dp0_Codex_AccountSwitch_internal.exe"
 start "" /MIN powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "%~dp0Set-CAS-WindowTitle.ps1" >nul 2>nul
 wscript.exe "%~dp0Start-CAS-Auth-Watcher.vbs" >nul 2>nul

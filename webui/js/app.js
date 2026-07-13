@@ -8,6 +8,7 @@
     "tab.help": "软件使用说明",
     "tab.settings": "设置",
     "toolbar.add_current": "添加账号",
+    "toolbar.login_running": "等待登录...",
     "search.placeholder": "搜索账号（支持账号名称/邮箱）",
     "group.all": "全部",
     "group.free": "Free",
@@ -38,24 +39,25 @@
     "settings.tab_visibility_hidden": "已隐藏",
     "summary.total_accounts": "总账号数",
     "summary.current_account": "当前账号",
-    "summary.avg_5h": "平均 5H",
-    "summary.avg_7d": "平均 7D",
+    "summary.avg_5h": "平均额度",
+    "summary.avg_7d": "平均次额度",
+    "summary.window_average": "平均 {window}",
     "summary.low_accounts": "低额度",
     "summary.current_empty": "暂无当前账号",
     "dialog.add_account.title": "添加 Codex 新账号",
-    "dialog.add_account.new_login_desc": "CAS 会先保护当前 Codex 登录文件，再重新打开 Codex 登录流程。默认浏览器如果还是旧账号，请先切换 Windows 默认浏览器或浏览器 Profile。",
+    "dialog.add_account.new_login_desc": "CAS 会保存当前登录，完整关闭 Codex，再启动官方 codex login。登录成功后会自动导入账号并重新打开 Codex。",
     "dialog.add_account.new_login_btn": "开始添加新账号",
     "dialog.add_account.guidance_title": "新增账号提醒",
     "dialog.add_account.guidance_neutral": "当前 CAS 管理 {count} 个账号。CAS 不看浏览器登录了谁，只导入 Codex 最后写出的 auth.json。",
     "dialog.add_account.guidance_four": "当前 CAS 管理 4 个账号，再新增就是第 5 个。建议只手动切换，不要并发跑任务，也不要自动轮换。",
     "dialog.add_account.guidance_many": "当前 CAS 管理 {count} 个账号，账号较多。建议降低登录、切换和刷新频率。",
     "dialog.prepare_new_login.title": "确认准备登录新账号",
-    "dialog.prepare_new_login.message": "下一步会关闭 Codex，把当前本地 auth.json 放进 CAS 保险箱，再重新打开 Codex 登录流程。它不会点击官方退出账号。",
+    "dialog.prepare_new_login.message": "下一步会保存当前 auth.json、完整关闭 Codex，再启动官方 codex login。登录失败时会自动恢复原账号。",
     "dialog.prepare_new_login.auth_note": "当前 CAS 已管理 {count} 个账号。CAS 只识别当前用户目录下的 .codex/auth.json，不识别浏览器账号。",
     "dialog.prepare_new_login.oauth_note": "如果默认浏览器还是旧账号，请先切换 Windows 默认浏览器或浏览器 Profile。OAuth 链接不要发给别人，也不要多个浏览器反复打开。",
     "dialog.prepare_new_login.frequency_note": "刚才已经准备过一次登录。先确认 Codex 是否已经进入新账号登录流程，再重复操作。",
     "dialog.relogin.title": "重新登录 Codex 账号",
-    "dialog.relogin.message": "账号 {name} 的认证已失效。下一步会保护当前本地 auth.json，再重新打开 Codex 登录流程。登录同一个邮箱后，CAS 会自动替换旧凭证。",
+    "dialog.relogin.message": "账号 {name} 的认证已失效。下一步会启动官方 codex login；登录同一个邮箱后，CAS 会自动替换旧凭证，失败则恢复原账号。",
     "dialog.rename.title": "重命名账号",
     "dialog.rename.name_label": "新账号名",
     "dialog.rename.name_placeholder": "请输入新账号名",
@@ -78,6 +80,7 @@
     "tag.plan_unknown": "未知类型",
     "quota.gpt": "Codex",
     "quota.placeholder": "暂无配额数据",
+    "quota.no_window": "官方暂未返回额度窗口",
     "quota.account_auth_expired": "账号认证失效了，重新登录后再试",
     "quota.account_refresh_failed": "额度刷新失败，稍后手动刷新这一行",
     "quota.account_abnormal": "账号状态异常，重新登录后再试",
@@ -87,6 +90,7 @@
     "quota.reset_free_title": "7D 重置倒计时 {r7}",
     "quota.remaining_5h": "5H",
     "quota.remaining_7d": "7D",
+    "quota.reset_dynamic": "{window} 重置倒计时 {time}",
     "action.switch_title": "切换到此账号",
     "action.switch": "切换",
     "action.relogin_title": "重新登录并更新此账号凭证",
@@ -116,6 +120,24 @@
     "status_code.config_saved": "设置已保存",
     "status_code.backup_saved": "账号备份已保存",
     "status_code.switch_success": "切换成功，正在重启 Codex",
+    "switch_progress.title": "正在切换 Codex 账号",
+    "switch_progress.target": "正在切换到 {name}",
+    "switch_progress.expected": "通常需要 4–8 秒，Codex 会自动重新打开。",
+    "switch_progress.slow": "Codex 启动比平时慢，仍在继续，请不要重复点击。",
+    "switch_progress.preparing": "正在准备目标账号…",
+    "switch_progress.closing": "正在关闭旧 Codex…",
+    "switch_progress.cleanup": "正在清理旧后台…",
+    "switch_progress.launching": "正在重新打开 Codex…",
+    "switch_progress.waiting": "正在等待 Codex 窗口…",
+    "switch_progress.ready": "切换完成，Codex 已重新打开",
+    "switch_progress.failed_launch": "未能重新打开 Codex",
+    "switch_progress.failed_timeout": "等待 Codex 窗口超时",
+    "switch_progress.failed_status": "无法读取切换状态",
+    "switch_progress.failed_hint": "账号状态已切换；重新打开只会启动 Codex，不会再次切换账号。",
+    "switch_progress.elapsed": "已用时 {seconds} 秒",
+    "switch_progress.retry": "重新打开 Codex",
+    "switch_progress.close": "关闭提示",
+    "switch_progress.retry_sent": "已重新发送打开请求",
     "status_code.delete_success": "删除成功",
     "status_code.import_success": "导入成功",
     "status_code.export_success": "导出成功",
@@ -129,6 +151,14 @@
     "status_code.account_renamed_and_refreshed": "账号已重命名并刷新额度",
     "status_code.prepare_new_login_opened": "已开始准备登录新账号",
     "status.prepare_new_login_opened": "已开始准备登录新账号",
+    "status.login_browser": "请在浏览器完成官方 Codex 登录",
+    "status.login_syncing": "登录完成，正在导入账号",
+    "status.login_success": "账号已登录并导入",
+    "status.login_restored": "登录失败，已恢复原账号",
+    "status.login_failed": "登录失败：{reason}",
+    "status.usage_refresh_success": "额度已刷新",
+    "status.usage_refresh_failed": "额度刷新失败，请稍后再试",
+    "status.usage_auth_expired": "账号认证已失效，请重新登录",
     "status_code.import_cancelled": "导入已取消",
     "status_code.export_cancelled": "导出已取消",
     "status_code.unknown_action": "未知操作",
@@ -193,7 +223,7 @@
     "notes.delete_message": "确认删除这个邮箱的备注吗？",
     "help.title": "软件使用说明",
     "help.add.title": "新增账号怎么走",
-    "help.add.text": "先点“添加账号”，再点“准备登录新账号”。CAS 会先把当前 Codex 登录文件放进保险箱，然后重新打开 Codex。你在浏览器里登录新账号后，重新打开 CAS 即可。",
+    "help.add.text": "先点“添加账号”，再点“开始添加新账号”。CAS 会保存当前登录并启动官方 codex login；你在浏览器完成登录后，新账号会自动导入。",
     "help.switch.title": "切换账号",
     "help.switch.text": "在账号列表里找到要用的邮箱，点右侧“切换”。确认后 CAS 会把本机 Codex 登录状态换成这个账号，并重启 Codex。切换前先停下正在跑的任务。",
     "help.logout.title": "不要在 Codex 里退出账号",
@@ -201,16 +231,20 @@
     "help.safety.title": "安全边界",
     "help.safety.text": "CAS 只做个人本地管理：手动导入、手动切换、手动刷新单个账号。不做反代、不改代理、不自动轮换、不低额度自动换号，也不并发多号跑同一批任务。",
     "help.quota.title": "查看额度",
-    "help.quota.text": "每个账号的“模型配额”里有 5H 和 7D 两条血条。它只显示上次手动刷新后的结果，不会在后台自动刷。",
+    "help.quota.text": "模型配额会按官方当前返回的时间窗口动态显示，不再固定写死 5H / 7D。它只显示上次手动刷新的结果。",
     "help.refresh.title": "刷新额度",
     "help.refresh.text": "想看某个号的最新额度，只点那一行的“刷新”。不要连续频繁刷，也不要多个号一起刷。",
     "help.notes.title": "账号备注",
     "help.notes.text": "点“账号备注”会进入单独的备注页面。每个邮箱一张本地备注卡，可以放登录线索、手机号、密钥提示，不参与登录、切换或刷新。",
     "help.delete.title": "删除账号",
     "help.delete.text": "不用的账号可以点“删除”，删除前会再问你一次，防止误删。",
+    "help.update.title": "获取更新",
+    "help.update.text": "新版本会发布到 GitHub。下载最新版后退出软件，覆盖解压到原目录，并保留 data 文件夹。下载地址：",
+    "help.update.url": "https://github.com/brienzahartzler176-sudo/codex-account-manager/releases",
     "help.support.title": "制作与售后",
-    "help.support.text": "本工具由本店提供，售后与更新入口：",
+    "help.support.text": "本工具由本店提供，制作与售后入口：",
     "help.support.url": "https://pay.ldxp.cn/shop/340",
+    "footer.update_link": "GitHub 更新",
     "footer.shop_link": "本店入口",
     "ide.codex": "Codex"
   };
@@ -270,6 +304,9 @@
     helpStepNotesText: document.getElementById("helpStepNotesText"),
     helpStepDeleteTitle: document.getElementById("helpStepDeleteTitle"),
     helpStepDeleteText: document.getElementById("helpStepDeleteText"),
+    helpStepUpdateTitle: document.getElementById("helpStepUpdateTitle"),
+    helpStepUpdateText: document.getElementById("helpStepUpdateText"),
+    helpStepUpdateLink: document.getElementById("helpStepUpdateLink"),
     helpStepSupportTitle: document.getElementById("helpStepSupportTitle"),
     helpStepSupportText: document.getElementById("helpStepSupportText"),
     helpStepSupportLink: document.getElementById("helpStepSupportLink"),
@@ -284,6 +321,7 @@
     summaryAvg7Value: document.getElementById("summaryAvg7Value"),
     summaryLowValue: document.getElementById("summaryLowValue"),
     countText: document.getElementById("countText"),
+    footerUpdateLink: document.getElementById("footerUpdateLink"),
     footerShopLink: document.getElementById("footerShopLink"),
     logEl: document.getElementById("log"),
     settingsTitle: document.getElementById("settingsTitle"),
@@ -321,6 +359,18 @@
     addPaneNewLoginDesc: document.getElementById("addPaneNewLoginDesc"),
     addAccountPrepareNewBtn: document.getElementById("addAccountPrepareNewBtn"),
     addAccountCancelBtn: document.getElementById("addAccountCancelBtn"),
+    switchProgressOverlay: document.getElementById("switchProgressOverlay"),
+    switchProgressSpinner: document.getElementById("switchProgressSpinner"),
+    switchProgressTitle: document.getElementById("switchProgressTitle"),
+    switchProgressTarget: document.getElementById("switchProgressTarget"),
+    switchProgressStage: document.getElementById("switchProgressStage"),
+    switchProgressHint: document.getElementById("switchProgressHint"),
+    switchProgressBar: document.getElementById("switchProgressBar"),
+    switchProgressSteps: document.getElementById("switchProgressSteps"),
+    switchProgressElapsed: document.getElementById("switchProgressElapsed"),
+    switchProgressActions: document.getElementById("switchProgressActions"),
+    switchProgressCloseBtn: document.getElementById("switchProgressCloseBtn"),
+    switchProgressRetryBtn: document.getElementById("switchProgressRetryBtn"),
     toastWrap: document.getElementById("toastWrap")
   };
 
@@ -339,6 +389,10 @@
   const ACCOUNT_NOTE_TAG_STYLE_KEY = "cas_account_note_tag_style_v1";
   const ADD_ACCOUNT_WATCH_INTERVAL_MS = 1000;
   const ADD_ACCOUNT_WATCH_TIMEOUT_MS = 5 * 60 * 1000;
+  const SWITCH_STATUS_POLL_MS = 250;
+  const SWITCH_SLOW_MS = 8000;
+  const SWITCH_TIMEOUT_MS = 25000;
+  const SWITCH_READY_HIDE_MS = 1200;
   const DEFAULT_ACCOUNT_NOTE_TAG_STYLE = {
     textColor: "#1d4ed8",
     bgColor: "#eff6ff"
@@ -357,6 +411,8 @@
   const LOCAL_METADATA_BASE_URL = "http://127.0.0.1:17842";
   const PREPARE_NEW_LOGIN_INTENTS_KEY = "cas_prepare_new_login_intents_v1";
   const PREPARE_NEW_LOGIN_WINDOW_MS = 30 * 60 * 1000;
+  const LOGIN_STATUS_POLL_MS = 800;
+  const LOGIN_STATUS_TIMEOUT_MS = 10 * 60 * 1000;
 
   const state = {
     appVersion: "v1.0.0",
@@ -407,7 +463,24 @@
     addAccountWatchDeadline: 0,
     addAccountWatchBaselineKeys: "",
     addAccountWatchBaselineCurrent: "",
-    refreshTargetAccount: null
+    refreshTargetAccount: null,
+    switchProgressActive: false,
+    switchProgressStage: "idle",
+    switchTargetName: "",
+    switchStartedAt: 0,
+    switchRequestStartedAt: 0,
+    switchPollTimer: 0,
+    switchElapsedTimer: 0,
+    switchReadyHideTimer: 0,
+    switchErrorCode: "",
+    switchOperationId: "",
+    switchStatusSeen: false,
+    loginProgressActive: false,
+    loginProgressStage: "idle",
+    loginStartedAt: 0,
+    loginStatusTimer: 0,
+    loginStatusOperationId: "",
+    loginLastToastStage: ""
   };
 
   const mediaDark = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
@@ -504,6 +577,211 @@
       el.style.transform = "translateY(-6px)";
     }, 2600);
     setTimeout(() => el.remove(), 3000);
+  }
+
+  const SWITCH_STAGE_UI = {
+    preparing: { step: 0, progress: 8, textKey: "switch_progress.preparing" },
+    closing: { step: 1, progress: 28, textKey: "switch_progress.closing" },
+    cleanup: { step: 1, progress: 44, textKey: "switch_progress.cleanup" },
+    launching: { step: 2, progress: 64, textKey: "switch_progress.launching" },
+    waiting: { step: 2, progress: 84, textKey: "switch_progress.waiting" },
+    ready: { step: 3, progress: 100, textKey: "switch_progress.ready" },
+    failed: { step: 2, progress: 92, textKey: "switch_progress.failed_launch" }
+  };
+
+  function getSwitchElapsedMs() {
+    if (!state.switchStartedAt) return 0;
+    return Math.max(0, Date.now() - state.switchStartedAt);
+  }
+
+  function clearSwitchProgressTimers() {
+    if (state.switchPollTimer) window.clearTimeout(state.switchPollTimer);
+    if (state.switchElapsedTimer) window.clearInterval(state.switchElapsedTimer);
+    if (state.switchReadyHideTimer) window.clearTimeout(state.switchReadyHideTimer);
+    state.switchPollTimer = 0;
+    state.switchElapsedTimer = 0;
+    state.switchReadyHideTimer = 0;
+  }
+
+  function getSwitchFailureText() {
+    if (state.switchErrorCode === "window_timeout") return t("switch_progress.failed_timeout");
+    if (state.switchErrorCode === "status_unavailable") return t("switch_progress.failed_status");
+    return t("switch_progress.failed_launch");
+  }
+
+  function renderSwitchProgress() {
+    if (!dom.switchProgressOverlay) return;
+    const active = !!state.switchProgressActive;
+    const stage = SWITCH_STAGE_UI[state.switchProgressStage] ? state.switchProgressStage : "preparing";
+    const meta = SWITCH_STAGE_UI[stage];
+    const isReady = stage === "ready";
+    const isFailed = stage === "failed";
+    const elapsedMs = getSwitchElapsedMs();
+
+    dom.switchProgressOverlay.classList.toggle("show", active);
+    dom.switchProgressOverlay.classList.toggle("is-ready", isReady);
+    dom.switchProgressOverlay.classList.toggle("is-failed", isFailed);
+    dom.switchProgressOverlay.setAttribute("aria-hidden", active ? "false" : "true");
+    if (!active) return;
+
+    if (dom.switchProgressTitle) dom.switchProgressTitle.textContent = t("switch_progress.title");
+    if (dom.switchProgressTarget) {
+      dom.switchProgressTarget.textContent = t("switch_progress.target", { name: state.switchTargetName });
+    }
+    if (dom.switchProgressStage) {
+      dom.switchProgressStage.textContent = isFailed ? getSwitchFailureText() : t(meta.textKey);
+    }
+    if (dom.switchProgressHint) {
+      if (isFailed) {
+        dom.switchProgressHint.textContent = t("switch_progress.failed_hint");
+      } else if (isReady) {
+        dom.switchProgressHint.textContent = "";
+      } else if (elapsedMs >= SWITCH_SLOW_MS) {
+        dom.switchProgressHint.textContent = t("switch_progress.slow");
+      } else {
+        dom.switchProgressHint.textContent = t("switch_progress.expected");
+      }
+    }
+    if (dom.switchProgressBar) dom.switchProgressBar.style.width = `${meta.progress}%`;
+    if (dom.switchProgressElapsed) {
+      dom.switchProgressElapsed.textContent = t("switch_progress.elapsed", {
+        seconds: (elapsedMs / 1000).toFixed(1)
+      });
+    }
+    dom.switchProgressSteps?.querySelectorAll("[data-switch-step]").forEach((item) => {
+      const step = Number(item.getAttribute("data-switch-step"));
+      item.classList.toggle("done", isReady ? step <= meta.step : step < meta.step);
+      item.classList.toggle("active", !isReady && !isFailed && step === meta.step);
+    });
+    if (dom.switchProgressActions) dom.switchProgressActions.hidden = !isFailed;
+    if (dom.switchProgressCloseBtn) dom.switchProgressCloseBtn.textContent = t("switch_progress.close");
+    if (dom.switchProgressRetryBtn) dom.switchProgressRetryBtn.textContent = t("switch_progress.retry");
+  }
+
+  function finishSwitchProgress() {
+    clearSwitchProgressTimers();
+    state.switchProgressActive = false;
+    state.switchProgressStage = "idle";
+    state.switchTargetName = "";
+    state.switchStartedAt = 0;
+    state.switchRequestStartedAt = 0;
+    state.switchErrorCode = "";
+    state.switchOperationId = "";
+    state.switchStatusSeen = false;
+    renderSwitchProgress();
+    renderAccounts();
+  }
+
+  function setSwitchProgressStage(stage, errorCode = "") {
+    if (!state.switchProgressActive || !SWITCH_STAGE_UI[stage]) return;
+    state.switchProgressStage = stage;
+    state.switchErrorCode = String(errorCode || "").trim().toLowerCase();
+    renderSwitchProgress();
+
+    if (stage === "ready") {
+      if (state.switchPollTimer) window.clearTimeout(state.switchPollTimer);
+      state.switchPollTimer = 0;
+      if (!state.switchReadyHideTimer) {
+        state.switchReadyHideTimer = window.setTimeout(finishSwitchProgress, SWITCH_READY_HIDE_MS);
+      }
+    } else if (stage === "failed") {
+      if (state.switchPollTimer) window.clearTimeout(state.switchPollTimer);
+      state.switchPollTimer = 0;
+    }
+  }
+
+  function scheduleSwitchStatusPoll(delay = SWITCH_STATUS_POLL_MS) {
+    if (!state.switchProgressActive || ["ready", "failed"].includes(state.switchProgressStage)) return;
+    if (state.switchPollTimer) window.clearTimeout(state.switchPollTimer);
+    state.switchPollTimer = window.setTimeout(pollSwitchStatus, delay);
+  }
+
+  async function pollSwitchStatus() {
+    state.switchPollTimer = 0;
+    if (!state.switchProgressActive || ["ready", "failed"].includes(state.switchProgressStage)) return;
+
+    try {
+      const response = await fetch(`${LOCAL_METADATA_BASE_URL}/switch-status`, {
+        method: "GET",
+        cache: "no-store"
+      });
+      const payload = await response.json();
+      if (!response.ok || payload?.ok === false) throw new Error(payload?.error || `HTTP ${response.status}`);
+
+      const stage = String(payload?.stage || "idle").trim().toLowerCase();
+      const updatedAt = Date.parse(String(payload?.updatedAt || ""));
+      const belongsToCurrentSwitch = Number.isFinite(updatedAt)
+        && updatedAt >= state.switchRequestStartedAt;
+      if (stage !== "idle" && SWITCH_STAGE_UI[stage] && belongsToCurrentSwitch) {
+        state.switchStatusSeen = true;
+        state.switchOperationId = String(payload?.operationId || "");
+        setSwitchProgressStage(stage, payload?.errorCode || "");
+      }
+    } catch (error) {
+      log(`switch status failed: ${error?.message || error}`);
+    }
+
+    if (!state.switchProgressActive || ["ready", "failed"].includes(state.switchProgressStage)) return;
+    if (getSwitchElapsedMs() >= SWITCH_TIMEOUT_MS) {
+      setSwitchProgressStage("failed", state.switchStatusSeen ? "window_timeout" : "status_unavailable");
+      return;
+    }
+    scheduleSwitchStatusPoll();
+  }
+
+  function beginAccountSwitch(name, group) {
+    if (state.switchProgressActive) return;
+    const now = Date.now();
+    state.switchProgressActive = true;
+    state.switchProgressStage = "preparing";
+    state.switchTargetName = String(name || "");
+    state.switchStartedAt = now;
+    state.switchRequestStartedAt = now;
+    state.switchErrorCode = "";
+    state.switchOperationId = "";
+    state.switchStatusSeen = false;
+    renderSwitchProgress();
+    renderAccounts();
+    state.switchElapsedTimer = window.setInterval(renderSwitchProgress, 100);
+    scheduleSwitchStatusPoll(0);
+
+    window.setTimeout(() => {
+      post("switch_account", {
+        account: name,
+        group,
+        language: state.currentLanguage,
+        ideExe: state.currentIdeExe
+      });
+    }, 0);
+  }
+
+  async function retryCodexLaunch() {
+    if (!state.switchProgressActive || state.switchProgressStage !== "failed") return;
+    if (dom.switchProgressRetryBtn) dom.switchProgressRetryBtn.disabled = true;
+    const now = Date.now();
+    try {
+      const response = await fetch(`${LOCAL_METADATA_BASE_URL}/launch-codex`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: "{}"
+      });
+      const payload = await response.json();
+      if (!response.ok || payload?.ok === false) throw new Error(payload?.error || `HTTP ${response.status}`);
+
+      state.switchStartedAt = now;
+      state.switchRequestStartedAt = now;
+      state.switchErrorCode = "";
+      state.switchStatusSeen = false;
+      setSwitchProgressStage("waiting");
+      showToast(t("switch_progress.retry_sent"), "info");
+      scheduleSwitchStatusPoll(0);
+    } catch (error) {
+      log(`Codex relaunch failed: ${error?.message || error}`);
+      setSwitchProgressStage("failed", "launch_failed");
+    } finally {
+      if (dom.switchProgressRetryBtn) dom.switchProgressRetryBtn.disabled = false;
+    }
   }
 
   function isUsefulAccountNotesText(text) {
@@ -1834,6 +2112,16 @@
     if (dom.helpStepNotesText) dom.helpStepNotesText.textContent = t("help.notes.text");
     if (dom.helpStepDeleteTitle) dom.helpStepDeleteTitle.textContent = t("help.delete.title");
     if (dom.helpStepDeleteText) dom.helpStepDeleteText.textContent = t("help.delete.text");
+    if (dom.helpStepUpdateTitle) dom.helpStepUpdateTitle.textContent = t("help.update.title");
+    if (dom.helpStepUpdateText) {
+      const updateUrl = t("help.update.url");
+      dom.helpStepUpdateText.textContent = `${t("help.update.text")} `;
+      if (dom.helpStepUpdateLink) {
+        dom.helpStepUpdateLink.href = updateUrl;
+        dom.helpStepUpdateLink.textContent = updateUrl;
+        dom.helpStepUpdateText.appendChild(dom.helpStepUpdateLink);
+      }
+    }
     if (dom.helpStepSupportTitle) dom.helpStepSupportTitle.textContent = t("help.support.title");
     if (dom.helpStepSupportText) {
       const supportUrl = t("help.support.url");
@@ -1843,6 +2131,10 @@
         dom.helpStepSupportLink.textContent = supportUrl;
         dom.helpStepSupportText.appendChild(dom.helpStepSupportLink);
       }
+    }
+    if (dom.footerUpdateLink) {
+      dom.footerUpdateLink.href = t("help.update.url");
+      dom.footerUpdateLink.textContent = t("footer.update_link");
     }
     if (dom.footerShopLink) {
       dom.footerShopLink.href = t("help.support.url");
@@ -1865,6 +2157,7 @@
     renderSettingsOptions();
     renderAccountSummary();
     renderAccounts();
+    renderSwitchProgress();
     applyCountText();
     renderQuickSwitchers();
   }
@@ -1987,8 +2280,7 @@
 
   function formatResetAvailableCount(value) {
     const n = toNonNegativeInteger(value);
-    if (n === null) return "重置 ?";
-    if (n === 0) return "重置 0";
+    if (n === null) return "可重置次数未知";
     return `可重置 ${n} 次`;
   }
 
@@ -2117,11 +2409,84 @@
     return "high";
   }
 
-  function renderQuotaBar(labelKey, value) {
+  function formatQuotaWindowLabel(windowSeconds, fallback = "额度") {
+    const seconds = Number(windowSeconds);
+    if (!Number.isFinite(seconds) || seconds <= 0) return fallback;
+    const hours = seconds / 3600;
+    const days = seconds / 86400;
+    if (Math.abs(days - Math.round(days)) < 0.01 && days >= 1) return `${Math.round(days)}D`;
+    if (Math.abs(hours - Math.round(hours)) < 0.01 && hours >= 1) return `${Math.round(hours)}H`;
+    if (hours >= 1) return `${Math.round(hours * 10) / 10}H`;
+    return `${Math.max(1, Math.round(seconds / 60))}M`;
+  }
+
+  function normalizeQuotaWindow(raw, fallbackLabel = "额度") {
+    if (!raw || typeof raw !== "object") return null;
+    const remainingPercent = toPercentNumber(raw.remainingPercent);
+    const windowSeconds = Number(raw.windowSeconds);
+    const resetAfterSeconds = Number(raw.resetAfterSeconds);
+    const resetAt = Number(raw.resetAt);
+    if (remainingPercent === null && (!Number.isFinite(windowSeconds) || windowSeconds <= 0)) return null;
+    return {
+      slot: String(raw.slot || ""),
+      label: formatQuotaWindowLabel(windowSeconds, fallbackLabel),
+      windowSeconds: Number.isFinite(windowSeconds) && windowSeconds > 0 ? Math.trunc(windowSeconds) : -1,
+      remainingPercent,
+      resetAfterSeconds: Number.isFinite(resetAfterSeconds) && resetAfterSeconds >= 0 ? Math.trunc(resetAfterSeconds) : -1,
+      resetAt: Number.isFinite(resetAt) && resetAt >= 0 ? Math.trunc(resetAt) : -1
+    };
+  }
+
+  function getQuotaWindows(item) {
+    const dynamic = (Array.isArray(item?.quotaWindows) ? item.quotaWindows : [])
+      .map((window) => normalizeQuotaWindow(window))
+      .filter(Boolean);
+    if (dynamic.length) {
+      return dynamic.sort((a, b) => {
+        if (a.windowSeconds < 0) return 1;
+        if (b.windowSeconds < 0) return -1;
+        return a.windowSeconds - b.windowSeconds;
+      });
+    }
+
+    const legacy = [];
+    const q5 = toPercentNumber(item?.quota5hRemainingPercent);
+    const r5 = Number(item?.quota5hResetAfterSeconds);
+    const configured5 = Number(item?.quota5hWindowSeconds);
+    if (q5 !== null) {
+      const inferred5 = Number.isFinite(configured5) && configured5 > 0
+        ? configured5
+        : (Number.isFinite(r5) && r5 > 86400 ? 604800 : 18000);
+      legacy.push(normalizeQuotaWindow({
+        slot: "legacy-primary",
+        windowSeconds: inferred5,
+        remainingPercent: q5,
+        resetAfterSeconds: r5,
+        resetAt: item?.quota5hResetAt
+      }, "主额度"));
+    }
+
+    const q7 = toPercentNumber(item?.quota7dRemainingPercent);
+    if (q7 !== null) {
+      const configured7 = Number(item?.quota7dWindowSeconds);
+      legacy.push(normalizeQuotaWindow({
+        slot: "legacy-secondary",
+        windowSeconds: Number.isFinite(configured7) && configured7 > 0 ? configured7 : 604800,
+        remainingPercent: q7,
+        resetAfterSeconds: item?.quota7dResetAfterSeconds,
+        resetAt: item?.quota7dResetAt
+      }, "周额度"));
+    }
+
+    const byWindow = new Map();
+    legacy.filter(Boolean).forEach((window) => byWindow.set(String(window.windowSeconds), window));
+    return [...byWindow.values()].sort((a, b) => a.windowSeconds - b.windowSeconds);
+  }
+
+  function renderQuotaBar(label, value) {
     const n = toPercentNumber(value);
     const width = n === null ? 0 : Math.max(0, Math.min(100, n));
     const text = formatPercentValue(value);
-    const label = t(labelKey);
     return `
       <div class="quota-bar-row ${escapeHtml(getQuotaLevelClass(value))}">
         <span class="quota-bar-label">${escapeHtml(label)}</span>
@@ -2133,26 +2498,29 @@
     `;
   }
 
-  function getPlanMetrics(item) {
-    const plan = normalizePlanType(item?.planType);
-    const q5 = toPercentNumber(item?.quota5hRemainingPercent);
-    const q7Raw = toPercentNumber(item?.quota7dRemainingPercent);
-    const q7 = plan === "free" ? (q7Raw ?? q5) : q7Raw;
-    return { plan, q5, q7 };
-  }
-
   function getAccountQuotaSummary(accounts = state.accounts) {
     const list = Array.isArray(accounts) ? accounts : [];
     const usable = list.filter((x) => x && x.usageOk);
-    const metrics = usable.map((x) => ({ name: getAccountEmail(x), ...getPlanMetrics(x) }));
-    const fiveHourMetrics = metrics.filter((x) => x.plan !== "free" && x.q5 !== null);
-    const sevenDayMetrics = metrics.filter((x) => x.q7 !== null);
-    const avg5 = fiveHourMetrics.length ? fiveHourMetrics.reduce((acc, x) => acc + x.q5, 0) / fiveHourMetrics.length : null;
-    const avg7 = sevenDayMetrics.length ? sevenDayMetrics.reduce((acc, x) => acc + x.q7, 0) / sevenDayMetrics.length : null;
+    const windowGroups = new Map();
+    usable.forEach((account) => {
+      getQuotaWindows(account).forEach((window) => {
+        if (window.remainingPercent === null) return;
+        const key = window.windowSeconds > 0 ? String(window.windowSeconds) : window.label;
+        if (!windowGroups.has(key)) windowGroups.set(key, { label: window.label, windowSeconds: window.windowSeconds, values: [] });
+        windowGroups.get(key).values.push(window.remainingPercent);
+      });
+    });
+    const windowAverages = [...windowGroups.values()]
+      .sort((a, b) => (a.windowSeconds < 0 ? Number.MAX_SAFE_INTEGER : a.windowSeconds) - (b.windowSeconds < 0 ? Number.MAX_SAFE_INTEGER : b.windowSeconds))
+      .slice(0, 2)
+      .map((entry) => ({
+        label: entry.label,
+        average: entry.values.reduce((sum, value) => sum + value, 0) / entry.values.length
+      }));
     const lowAccounts = usable
       .map((x) => {
-        const m = getPlanMetrics(x);
-        return { name: getAccountEmail(x), lowValue: m.plan === "free" ? m.q7 : m.q5 };
+        const values = getQuotaWindows(x).map((window) => window.remainingPercent).filter((value) => value !== null);
+        return { name: getAccountEmail(x), lowValue: values.length ? Math.min(...values) : null };
       })
       .filter((x) => x.lowValue !== null && x.lowValue < 20)
       .sort((a, b) => a.lowValue - b.lowValue);
@@ -2161,8 +2529,7 @@
     return {
       total: list.length,
       currentName: current ? (getAccountEmail(current) || String(current.name || "")) : "",
-      avg5,
-      avg7,
+      windows: windowAverages,
       lowCount: lowAccounts.length
     };
   }
@@ -2175,8 +2542,16 @@
       dom.summaryCurrentValue.textContent = currentText;
       dom.summaryCurrentValue.title = currentText;
     }
-    if (dom.summaryAvg5Value) dom.summaryAvg5Value.textContent = formatPercentValue(summary.avg5);
-    if (dom.summaryAvg7Value) dom.summaryAvg7Value.textContent = formatPercentValue(summary.avg7);
+    const summaryWindows = [
+      { label: dom.summaryAvg5Label, value: dom.summaryAvg5Value, metric: summary.windows[0] },
+      { label: dom.summaryAvg7Label, value: dom.summaryAvg7Value, metric: summary.windows[1] }
+    ];
+    summaryWindows.forEach(({ label, value, metric }) => {
+      const item = label?.closest(".summary-item");
+      item?.classList.toggle("is-hidden", !metric);
+      if (label && metric) label.textContent = t("summary.window_average", { window: metric.label });
+      if (value) value.textContent = formatPercentValue(metric?.average);
+    });
     if (dom.summaryLowValue) {
       dom.summaryLowValue.textContent = String(summary.lowCount);
       dom.summaryLowValue.classList.toggle("is-warning", summary.lowCount > 0);
@@ -2316,6 +2691,7 @@
         item.isCurrent ? "1" : "0",
         item.usageOk ? "1" : "0",
         item.abnormal ? "1" : "0",
+        JSON.stringify(Array.isArray(item.quotaWindows) ? item.quotaWindows : []),
         item.quota5hRemainingPercent,
         item.quota7dRemainingPercent,
         item.quotaResetAvailableCount
@@ -2349,8 +2725,9 @@
 
   function renderPrimaryActionButtons() {
     if (!dom.addAccountBtn) return;
-    dom.addAccountBtn.disabled = false;
-    dom.addAccountBtn.innerHTML = `<span class="btn-icon">＋</span><span>${escapeHtml(t("toolbar.add_current"))}</span>`;
+    dom.addAccountBtn.disabled = state.switchProgressActive || state.loginProgressActive;
+    const labelKey = state.loginProgressActive ? "toolbar.login_running" : "toolbar.add_current";
+    dom.addAccountBtn.innerHTML = `<span class="btn-icon">＋</span><span>${escapeHtml(t(labelKey))}</span>`;
   }
 
   function getAccountsTotalPages() {
@@ -2398,6 +2775,7 @@
 
   function renderAccounts() {
     if (!dom.accountsBody) return;
+    renderPrimaryActionButtons();
     renderAccountSummary();
     renderAccountsPagination();
     applyCountText();
@@ -2410,8 +2788,9 @@
     dom.accountsBody.innerHTML = getCurrentAccountsPageItems().map((item) => {
       const accountKey = makeAccountKey(item.name, item.group);
       const isThisRefreshing = state.refreshMode === "account" && state.refreshTargetKey === accountKey;
-      const disableRefreshAction = state.refreshMode === "all" || isThisRefreshing || !!state.importMode;
-      const disableSwitchAction = !!state.importMode || !!state.refreshMode;
+      const disableAccountMutation = !!state.importMode || state.switchProgressActive || state.loginProgressActive;
+      const disableRefreshAction = state.refreshMode === "all" || isThisRefreshing || disableAccountMutation;
+      const disableSwitchAction = !!state.importMode || !!state.refreshMode || state.switchProgressActive || state.loginProgressActive;
       const normalizedPlanType = normalizePlanType(item.planType);
       const normalizedGroup = normalizeGroupValue(item.group);
       const planLabel = formatPlanTypeLabel(item.planType);
@@ -2423,37 +2802,30 @@
         || normalizedGroup !== normalizedPlanType;
       const groupTagLabel = item.abnormal ? t("tag.abnormal") : formatGroupLabel(normalizedGroup);
       const groupTagClass = item.abnormal ? "abnormal" : `group ${normalizedGroup}`;
-      const isFreePlan = normalizedPlanType === "free";
       const email = getAccountEmail(item);
       const name = String(item.name || "").trim();
       const alias = name && email && name !== email ? `<span class="account-alias">昵称：${escapeHtml(name)}</span>` : "";
       const accountInitial = "C";
-      const freeQ7Value = Number(item.quota7dRemainingPercent) >= 0
-        ? item.quota7dRemainingPercent
-        : item.quota5hRemainingPercent;
-      const freeR7Value = Number(item.quota7dResetAfterSeconds) >= 0
-        ? item.quota7dResetAfterSeconds
-        : item.quota5hResetAfterSeconds;
-      const reset5hHours = formatHoursFromSeconds(item.quota5hResetAfterSeconds);
-      const reset7dHours = formatHoursFromSeconds(item.quota7dResetAfterSeconds);
-      const freeReset7dHours = formatHoursFromSeconds(freeR7Value);
-      const resetText = isFreePlan
-        ? t("quota.reset_free", { r7: formatDaysFromSeconds(freeR7Value) })
-        : t("quota.reset", {
-          r5: reset5hHours,
-          r7: formatDaysFromSeconds(item.quota7dResetAfterSeconds)
-        });
-      const resetTitle = isFreePlan
-        ? t("quota.reset_free_title", { r7: freeReset7dHours })
-        : t("quota.reset_title", { r5: reset5hHours, r7: reset7dHours });
+      const quotaWindows = getQuotaWindows(item);
+      const resetWindows = quotaWindows
+        .filter((window) => Number.isFinite(window.resetAfterSeconds) && window.resetAfterSeconds >= 0)
+        .sort((a, b) => a.resetAfterSeconds - b.resetAfterSeconds);
+      const nextResetWindow = resetWindows[0] || null;
+      const resetText = nextResetWindow
+        ? t("quota.reset_dynamic", {
+            window: nextResetWindow.label,
+            time: formatDaysFromSeconds(nextResetWindow.resetAfterSeconds)
+          })
+        : "";
+      const resetTitle = resetWindows
+        .map((window) => `${window.label} 重置倒计时：${formatHoursFromSeconds(window.resetAfterSeconds)}`)
+        .join("\n");
       const itemResetCount = toNonNegativeInteger(item.quotaResetAvailableCount);
       const cachedResetCount = getCachedQuotaResetAvailableCount(item);
-      const effectiveResetCount = itemResetCount ?? cachedResetCount ?? (item.usageOk && !item.abnormal ? 0 : null);
+      const effectiveResetCount = itemResetCount ?? cachedResetCount ?? null;
       const resetCountText = formatResetAvailableCount(effectiveResetCount);
       const resetCountKnown = effectiveResetCount !== null;
-      const resetCountHtml = resetCountKnown
-        ? `<span class="quota-reset-count" title="只读显示，不会触发重置">${escapeHtml(resetCountText)}</span>`
-        : "";
+      const resetCountHtml = `<span class="quota-reset-count${resetCountKnown ? "" : " unknown"}" title="可重置次数来自官方额度信息，仅作显示，不会触发重置">${escapeHtml(resetCountText)}</span>`;
       const effectiveFirstAddedAt = String(item.firstAddedAt || getCachedFirstAddedAt(item) || "").trim();
       const firstAddedMeta = formatFirstAddedMeta(effectiveFirstAddedAt, item.planType || item.group);
       const firstAddedTitle = firstAddedMeta
@@ -2463,18 +2835,17 @@
       const primaryAction = item.abnormal ? "reauth" : "switch";
       const primaryActionTitle = item.abnormal ? t("action.relogin_title") : t("action.switch_title");
       const primaryActionLabel = item.abnormal ? t("action.relogin") : t("action.switch");
-      const primaryActionDisabled = item.abnormal ? false : disableSwitchAction;
+      const primaryActionDisabled = state.switchProgressActive || (item.abnormal ? false : disableSwitchAction);
       const quotaBody = item.usageOk && !item.abnormal
         ? `
           <div class="quota-head">
             <span class="quota-name">${escapeHtml(t("quota.gpt"))}</span>
-            <span class="quota-reset" title="${escapeHtml(resetTitle)}">${escapeHtml(resetText)}</span>
+            ${resetText ? `<span class="quota-reset" title="${escapeHtml(resetTitle)}">${escapeHtml(resetText)}</span>` : ""}
             ${resetCountHtml}
           </div>
-          <div class="quota-bars">
-            ${renderQuotaBar("quota.remaining_5h", item.quota5hRemainingPercent)}
-            ${renderQuotaBar("quota.remaining_7d", isFreePlan ? freeQ7Value : item.quota7dRemainingPercent)}
-          </div>
+          ${quotaWindows.length
+            ? `<div class="quota-bars">${quotaWindows.map((window) => renderQuotaBar(window.label, window.remainingPercent)).join("")}</div>`
+            : `<div class="quota-placeholder">${escapeHtml(t("quota.no_window"))}</div>`}
           ${plusEstimate ? `<div class="plan-estimate" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(plusEstimate)}</div>` : ""}
         `
         : `<div class="quota-placeholder">${escapeHtml(item.abnormal ? getAccountIssueText(item) : (String(item.usageError || "").trim() || t("quota.placeholder")))}</div>`;
@@ -2506,10 +2877,10 @@
           </td>
           <td class="actions-col">
             <div class="actions">
-              <button class="btn-action ${item.abnormal ? "reauth" : "switch"}" data-action="${escapeHtml(primaryAction)}" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(primaryActionTitle)}" ${primaryActionDisabled ? "disabled" : ""}>${actionIcon("switch")}${escapeHtml(primaryActionLabel)}</button>
-              <button class="btn-action rename" data-action="rename" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.rename_title"))}" ${state.importMode ? "disabled" : ""}>${actionIcon("rename")}${escapeHtml(t("action.rename"))}</button>
-              <button class="btn-action refresh ${isThisRefreshing ? "loading" : ""}" data-action="refresh" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.refresh_title"))}" ${disableRefreshAction ? "disabled" : ""}>${actionIcon("refresh")}${escapeHtml(t("action.refresh"))}</button>
-              <button class="btn-action delete" data-action="delete" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.delete_title"))}" ${state.importMode ? "disabled" : ""}>${actionIcon("delete")}${escapeHtml(t("action.delete"))}</button>
+              <button class="btn-action ${item.abnormal ? "reauth" : "switch"}" data-action="${escapeHtml(primaryAction)}" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(primaryActionTitle)}" aria-label="${escapeHtml(primaryActionTitle)}" ${primaryActionDisabled ? "disabled" : ""}>${actionIcon("switch")}<span class="btn-action-label">${escapeHtml(primaryActionLabel)}</span></button>
+              <button class="btn-action rename" data-action="rename" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.rename_title"))}" aria-label="${escapeHtml(t("action.rename_title"))}" ${disableAccountMutation ? "disabled" : ""}>${actionIcon("rename")}<span class="btn-action-label">${escapeHtml(t("action.rename"))}</span></button>
+              <button class="btn-action refresh ${isThisRefreshing ? "loading" : ""}" data-action="refresh" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.refresh_title"))}" aria-label="${escapeHtml(t("action.refresh_title"))}" ${disableRefreshAction ? "disabled" : ""}>${actionIcon("refresh")}<span class="btn-action-label">${escapeHtml(t("action.refresh"))}</span></button>
+              <button class="btn-action delete" data-action="delete" data-name="${escapeHtml(item.name)}" data-group="${escapeHtml(item.group || "personal")}" title="${escapeHtml(t("action.delete_title"))}" aria-label="${escapeHtml(t("action.delete_title"))}" ${disableAccountMutation ? "disabled" : ""}>${actionIcon("delete")}<span class="btn-action-label">${escapeHtml(t("action.delete"))}</span></button>
             </div>
           </td>
         </tr>
@@ -2574,6 +2945,38 @@
         log(`quota reset count refresh unavailable: ${error?.message || error}`);
         return false;
       });
+  }
+
+  async function refreshAccountUsage(target) {
+    if (!target?.account || !window.fetch) return false;
+    try {
+      const response = await fetch(`${LOCAL_METADATA_BASE_URL}/account-usage/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: target.account, group: target.group || "" })
+      });
+      const payload = await response.json();
+      await requestAccountsList(true);
+      await refreshQuotaResetCountCache({ render: false });
+      if (!response.ok || payload?.ok === false) {
+        if (payload?.error === "auth_expired") {
+          showToast(t("status.usage_auth_expired"), "warning");
+        } else {
+          showToast(t("status.usage_refresh_failed"), "error");
+        }
+        return false;
+      }
+      showToast(t("status.usage_refresh_success"), "success");
+      return true;
+    } catch (error) {
+      log(`account usage refresh unavailable: ${error?.message || error}`);
+      showToast(t("status.usage_refresh_failed"), "error");
+      return false;
+    } finally {
+      setRefreshBusy("", "");
+      state.refreshTargetAccount = null;
+      requestAccountsList();
+    }
   }
 
   function requestLanguagePack(code) {
@@ -2643,6 +3046,96 @@
     state.addAccountWatchBaselineCurrent = "";
   }
 
+  function stopLoginStatusWatch() {
+    if (state.loginStatusTimer) {
+      window.clearInterval(state.loginStatusTimer);
+      state.loginStatusTimer = 0;
+    }
+  }
+
+  function getLoginErrorReason(errorCode) {
+    const reasons = {
+      login_failed: "登录流程出错",
+      codex_cli_missing: "未找到 Codex CLI",
+      codex_login_failed: "官方登录未完成",
+      auth_not_created: "登录后未生成 auth.json",
+      sync_script_missing: "账号同步脚本缺失",
+      account_sync_failed: "账号导入失败",
+      current_login_backup_failed: "当前账号备份失败",
+      protocol_not_started: "登录入口没有启动",
+      login_timeout: "等待登录超时"
+    };
+    return reasons[String(errorCode || "")] || String(errorCode || "未知错误");
+  }
+
+  function finishLoginStatus(success, options = {}) {
+    stopLoginStatusWatch();
+    state.loginProgressActive = false;
+    state.loginProgressStage = success ? "ready" : String(options.stage || "failed");
+    renderPrimaryActionButtons();
+    renderAccounts();
+    if (success) {
+      stopAddAccountWatch();
+      try { localStorage.removeItem(PREPARE_NEW_LOGIN_INTENTS_KEY); } catch (_) {}
+      requestAccountsList(true);
+      showToast(t("status.login_success"), "success");
+      return;
+    }
+    const errorCode = String(options.errorCode || "login_failed");
+    if (options.stage === "restored") {
+      showToast(t("status.login_restored"), "warning");
+    } else {
+      showToast(t("status.login_failed", { reason: getLoginErrorReason(errorCode) }), "error");
+    }
+  }
+
+  async function pollLoginStatus() {
+    if (!state.loginProgressActive || !window.fetch) return;
+    if (Date.now() - state.loginStartedAt > LOGIN_STATUS_TIMEOUT_MS) {
+      finishLoginStatus(false, { errorCode: "login_timeout" });
+      return;
+    }
+    try {
+      const response = await fetch(`${LOCAL_METADATA_BASE_URL}/login-status`, { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok || payload?.ok === false || payload?.stage === "idle") return;
+      const startedAt = Date.parse(String(payload.startedAt || ""));
+      if (!Number.isFinite(startedAt) || startedAt < state.loginStartedAt - 3000) return;
+
+      const operationId = String(payload.operationId || "");
+      if (state.loginStatusOperationId && operationId && state.loginStatusOperationId !== operationId) return;
+      if (operationId) state.loginStatusOperationId = operationId;
+      const stage = String(payload.stage || "idle");
+      state.loginProgressStage = stage;
+      renderPrimaryActionButtons();
+      if (stage !== state.loginLastToastStage) {
+        state.loginLastToastStage = stage;
+        if (stage === "signing_in") showToast(t("status.login_browser"), "info");
+        if (stage === "syncing") showToast(t("status.login_syncing"), "info");
+      }
+      if (stage === "ready") {
+        finishLoginStatus(true);
+      } else if (stage === "restored" || stage === "failed") {
+        finishLoginStatus(false, { stage, errorCode: payload.errorCode });
+      }
+    } catch (error) {
+      log(`login status unavailable: ${error?.message || error}`);
+    }
+  }
+
+  function startLoginStatusWatch() {
+    stopLoginStatusWatch();
+    state.loginProgressActive = true;
+    state.loginProgressStage = "preparing";
+    state.loginStartedAt = Date.now();
+    state.loginStatusOperationId = "";
+    state.loginLastToastStage = "";
+    renderPrimaryActionButtons();
+    renderAccounts();
+    state.loginStatusTimer = window.setInterval(pollLoginStatus, LOGIN_STATUS_POLL_MS);
+    window.setTimeout(pollLoginStatus, 350);
+  }
+
   function startAddAccountWatch() {
     stopAddAccountWatch();
     state.addAccountWatchDeadline = Date.now() + ADD_ACCOUNT_WATCH_TIMEOUT_MS;
@@ -2704,6 +3197,7 @@
   function openPrepareNewLoginProtocol() {
     try {
       startAddAccountWatch();
+      startLoginStatusWatch();
       if (window.CAS_HTTP_BRIDGE) {
         post("prepare_new_login");
       } else {
@@ -2711,7 +3205,7 @@
       }
       showToast(t("status.prepare_new_login_opened"), "info");
     } catch (_) {
-      showToast("cas-new-login", "error");
+      finishLoginStatus(false, { errorCode: "protocol_not_started" });
     }
   }
 
@@ -2814,6 +3308,10 @@
       renderAccountNotesList();
     });
     dom.addAccountCancelBtn?.addEventListener("click", closeAddAccountModal);
+    dom.switchProgressCloseBtn?.addEventListener("click", () => {
+      if (state.switchProgressStage === "failed") finishSwitchProgress();
+    });
+    dom.switchProgressRetryBtn?.addEventListener("click", retryCodexLaunch);
     dom.addAccountModal?.addEventListener("click", (e) => {
       if (e.target === dom.addAccountModal) closeAddAccountModal();
     });
@@ -2849,12 +3347,7 @@
         openConfirm({
           title: t("dialog.confirm.title"),
           message: t("confirm.switch_restart_ide", { name, ide }),
-          onConfirm: () => post("switch_account", {
-            account: name,
-            group,
-            language: state.currentLanguage,
-            ideExe: state.currentIdeExe
-          })
+          onConfirm: () => beginAccountSwitch(name, group)
         });
       } else if (action === "reauth") {
         openReloginConfirmation(name);
@@ -2871,7 +3364,7 @@
         if (state.refreshMode) return;
         state.refreshTargetAccount = { account: name, group };
         setRefreshBusy("account", makeAccountKey(name, group));
-        post("refresh_account", { account: name, group });
+        refreshAccountUsage(state.refreshTargetAccount);
       } else if (action === "delete") {
         openConfirm({
           title: t("dialog.delete.title"),
@@ -3064,6 +3557,11 @@
 
       if (msg && typeof msg === "object" && msg.type === "status") {
         const statusCode = String(msg.code || "");
+        if (state.switchProgressActive && statusCode === "restart_failed") {
+          setSwitchProgressStage("failed", "launch_failed");
+        } else if (state.switchProgressActive && msg.level === "error") {
+          setSwitchProgressStage("failed", "switch_failed");
+        }
         if (statusCode === "quota_refresh_progress") {
           if (!state.refreshMode) setRefreshBusy("all");
           state.refreshProgressCurrent = Math.max(0, Math.trunc(Number(msg.current) || 0));
@@ -3080,15 +3578,9 @@
           "account_abnormal_marked",
           "quota_refresh_running"
         ].includes(statusCode)) {
-          const resetTarget = statusCode === "account_quota_refreshed" ? state.refreshTargetAccount : null;
-          const shouldRefreshResetCounts = statusCode === "account_quota_refreshed" || statusCode === "quota_refreshed";
           setRefreshBusy("", "");
           state.refreshTargetAccount = null;
-          if (shouldRefreshResetCounts) {
-            refreshQuotaResetCounts(resetTarget).finally(() => requestAccountsList(true));
-          } else {
-            requestAccountsList(true);
-          }
+          requestAccountsList(true);
         }
 
         if ([

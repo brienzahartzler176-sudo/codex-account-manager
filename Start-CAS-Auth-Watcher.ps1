@@ -10,6 +10,7 @@ $dataRoot = Join-Path $toolRoot "data"
 $pidPath = Join-Path $dataRoot "cas-auth-watcher.pid"
 $logPath = Join-Path $dataRoot "cas-auth-watcher.log"
 $lastHashPath = Join-Path $dataRoot "cas-auth-last-hash.txt"
+$loginLockPath = Join-Path $dataRoot "login-operation.lock"
 $syncScript = Join-Path $toolRoot "Sync-Current-Codex-To-CAS.ps1"
 $authPath = Join-Path $HOME ".codex\auth.json"
 $authDirectory = Split-Path -Parent $authPath
@@ -55,6 +56,19 @@ function Set-LastSyncedAuthHash {
   try { $Hash | Set-Content -LiteralPath $lastHashPath -Encoding ASCII } catch {}
 }
 
+function Test-LoginOperationActive {
+  if (-not (Test-Path -LiteralPath $loginLockPath)) { return $false }
+  try {
+    $ageMinutes = ((Get-Date) - (Get-Item -LiteralPath $loginLockPath).LastWriteTime).TotalMinutes
+    if ($ageMinutes -le 20) { return $true }
+    Remove-Item -LiteralPath $loginLockPath -Force -ErrorAction SilentlyContinue
+    Write-WatcherLog "stale login operation lock removed"
+  } catch {
+    return $true
+  }
+  return $false
+}
+
 function Test-CasRunning {
   $cas = @(Get-Process -Name "_Codex_AccountSwitch_internal" -ErrorAction SilentlyContinue)
   if ($cas.Count -gt 0) { return $true }
@@ -65,14 +79,20 @@ function Test-CasRunning {
 function Invoke-Sync {
   if (-not (Test-Path -LiteralPath $syncScript)) {
     Write-WatcherLog "sync skipped: script missing"
-    return
+    return $false
+  }
+  if (Test-LoginOperationActive) {
+    Write-WatcherLog "sync deferred: interactive login is active"
+    return $false
   }
 
   try {
     & $powershellExe -NoLogo -NoProfile -ExecutionPolicy Bypass -File $syncScript -Quiet -NoUsage -ClearAbnormal | Out-Null
     Write-WatcherLog ("sync finished: exit={0}" -f $LASTEXITCODE)
+    return ($LASTEXITCODE -eq 0)
   } catch {
     Write-WatcherLog ("sync failed: {0}" -f $_.Exception.Message)
+    return $false
   }
 }
 
@@ -127,10 +147,11 @@ try {
   $missingCasTicks = 0
   if ($lastHash -and $lastHash -ne $lastSyncedHash) {
     Write-WatcherLog "startup auth differs from last synced hash: syncing"
-    Invoke-Sync
-    Set-LastSyncedAuthHash $lastHash
-    Invoke-Cleanup
-    $lastCleanupAt = Get-Date
+    if (Invoke-Sync) {
+      Set-LastSyncedAuthHash $lastHash
+      Invoke-Cleanup
+      $lastCleanupAt = Get-Date
+    }
   } else {
     Write-WatcherLog "startup sync skipped: auth unchanged"
   }
@@ -141,12 +162,29 @@ try {
       Start-Sleep -Milliseconds 350
       $hash = Get-AuthHash
       if ($hash -and $hash -ne $lastHash) {
-        $lastHash = $hash
         Write-WatcherLog ("auth file event ({0}): syncing current Codex account" -f $change.ChangeType)
-        Invoke-Sync
-        Set-LastSyncedAuthHash $hash
-        Invoke-Cleanup
-        $lastCleanupAt = Get-Date
+        if (Invoke-Sync) {
+          $lastHash = $hash
+          Set-LastSyncedAuthHash $hash
+          Invoke-Cleanup
+          $lastCleanupAt = Get-Date
+        }
+      }
+    } else {
+      $hash = Get-AuthHash
+      if ($hash -and -not (Test-LoginOperationActive)) {
+        $persistedHash = Get-LastSyncedAuthHash
+        if ($hash -eq $persistedHash -and $hash -ne $lastHash) {
+          $lastHash = $hash
+        } elseif ($hash -ne $persistedHash) {
+          Write-WatcherLog "deferred auth change detected: syncing current Codex account"
+          if (Invoke-Sync) {
+            $lastHash = $hash
+            Set-LastSyncedAuthHash $hash
+            Invoke-Cleanup
+            $lastCleanupAt = Get-Date
+          }
+        }
       }
     }
 

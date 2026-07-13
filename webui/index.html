@@ -16,7 +16,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="./css/styles.css?v=20260621-notes-file" />
+  <link rel="stylesheet" href="./css/styles.css?v=20260714-github-update" />
   <script>
     (function () {
       try {
@@ -73,11 +73,11 @@
               <strong class="summary-value" id="summaryCurrentValue">-</strong>
             </div>
             <div class="summary-item">
-              <span class="summary-label" id="summaryAvg5Label">平均 5H</span>
+              <span class="summary-label" id="summaryAvg5Label">平均额度</span>
               <strong class="summary-value" id="summaryAvg5Value">-</strong>
             </div>
             <div class="summary-item">
-              <span class="summary-label" id="summaryAvg7Label">平均 7D</span>
+              <span class="summary-label" id="summaryAvg7Label">平均次额度</span>
               <strong class="summary-value" id="summaryAvg7Value">-</strong>
             </div>
             <div class="summary-item">
@@ -156,7 +156,7 @@
             <div class="help-list">
               <div class="help-item">
                 <div class="help-item-title" id="helpStepAddTitle">这个工具怎么用</div>
-                <div class="help-item-text" id="helpStepAddText">这个工具只做本地账号管理：保存你导入过的 Codex 登录备份、显示你手动刷新过的额度、按你点击的按钮切换账号。新增账号时先点“准备登录新账号”。CAS 最终只看 Codex 写出的 auth.json，不看浏览器里登录了几个账号。</div>
+                <div class="help-item-text" id="helpStepAddText">这个工具只做本地账号管理：保存登录备份、显示手动刷新的额度、按按钮切换账号。新增账号会启动官方 codex login，浏览器登录成功后自动导入。</div>
               </div>
               <div class="help-item">
                 <div class="help-item-title" id="helpStepSwitchTitle">切换账号</div>
@@ -172,7 +172,7 @@
               </div>
               <div class="help-item">
                 <div class="help-item-title" id="helpStepQuotaTitle">查看额度</div>
-                <div class="help-item-text" id="helpStepQuotaText">每个账号的“模型配额”里有 5H 和 7D 两条血条。它只显示上次手动刷新后的结果，不会在后台自动刷。</div>
+                <div class="help-item-text" id="helpStepQuotaText">模型配额会按官方当前返回的时间窗口动态显示，不再固定写死 5H / 7D。它只显示上次手动刷新的结果。</div>
               </div>
               <div class="help-item">
                 <div class="help-item-title" id="helpStepRefreshTitle">刷新额度</div>
@@ -187,8 +187,12 @@
                 <div class="help-item-text" id="helpStepDeleteText">不用的账号可以点“删除”，删除前会再问你一次，防止误删。</div>
               </div>
               <div class="help-item">
+                <div class="help-item-title" id="helpStepUpdateTitle">获取更新</div>
+                <div class="help-item-text" id="helpStepUpdateText">新版本会发布到 GitHub。下载最新版后退出软件，覆盖解压到原目录，并保留 data 文件夹。下载地址： <a class="support-link" id="helpStepUpdateLink" href="https://github.com/brienzahartzler176-sudo/codex-account-manager/releases" target="_blank" rel="noopener noreferrer">https://github.com/brienzahartzler176-sudo/codex-account-manager/releases</a></div>
+              </div>
+              <div class="help-item">
                 <div class="help-item-title" id="helpStepSupportTitle">制作与售后</div>
-                <div class="help-item-text" id="helpStepSupportText">本工具由本店提供，售后与更新入口： <a class="support-link" id="helpStepSupportLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">https://pay.ldxp.cn/shop/340</a></div>
+                <div class="help-item-text" id="helpStepSupportText">本工具由本店提供，制作与售后入口： <a class="support-link" id="helpStepSupportLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">https://pay.ldxp.cn/shop/340</a></div>
               </div>
             </div>
           </div>
@@ -235,11 +239,44 @@
 
     <footer class="footer">
       <div id="countText"></div>
-      <a class="footer-credit" id="footerShopLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">本店入口</a>
+      <div class="footer-links">
+        <a class="footer-credit footer-update" id="footerUpdateLink" href="https://github.com/brienzahartzler176-sudo/codex-account-manager/releases" target="_blank" rel="noopener noreferrer">GitHub 更新</a>
+        <a class="footer-credit" id="footerShopLink" href="https://pay.ldxp.cn/shop/340" target="_blank" rel="noopener noreferrer">本店入口</a>
+      </div>
     </footer>
   </div>
 
   <div class="toast-wrap" id="toastWrap"></div>
+
+  <div class="switch-progress-mask" id="switchProgressOverlay" aria-hidden="true">
+    <section class="switch-progress-panel" role="status" aria-live="polite" aria-labelledby="switchProgressTitle">
+      <div class="switch-progress-head">
+        <div class="switch-progress-spinner" id="switchProgressSpinner" aria-hidden="true"></div>
+        <div>
+          <div class="switch-progress-title" id="switchProgressTitle">正在切换 Codex 账号</div>
+          <div class="switch-progress-target" id="switchProgressTarget"></div>
+        </div>
+      </div>
+      <div class="switch-progress-stage" id="switchProgressStage">正在准备目标账号…</div>
+      <div class="switch-progress-hint" id="switchProgressHint">通常需要 4–8 秒，Codex 会自动重新打开。</div>
+      <div class="switch-progress-track" aria-hidden="true">
+        <div class="switch-progress-bar" id="switchProgressBar"></div>
+      </div>
+      <ol class="switch-progress-steps" id="switchProgressSteps">
+        <li data-switch-step="0">准备账号</li>
+        <li data-switch-step="1">关闭旧会话</li>
+        <li data-switch-step="2">启动 Codex</li>
+        <li data-switch-step="3">完成</li>
+      </ol>
+      <div class="switch-progress-footer">
+        <span id="switchProgressElapsed">已用时 0.0 秒</span>
+        <div class="switch-progress-actions" id="switchProgressActions" hidden>
+          <button class="mini" id="switchProgressCloseBtn" type="button">关闭提示</button>
+          <button class="mini primary" id="switchProgressRetryBtn" type="button">重新打开 Codex</button>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <div class="modal-mask" id="confirmModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
@@ -279,7 +316,7 @@
             <div class="add-account-guidance-title" id="addAccountGuidanceTitle">新增账号提醒</div>
             <div class="add-account-guidance-text" id="addAccountGuidanceText">CAS 只导入 Codex 最后写出的 auth.json。</div>
           </div>
-          <div class="add-account-desc" id="addPaneNewLoginDesc">CAS 会先保护当前 Codex 登录文件，再重新打开 Codex 登录流程。默认浏览器如果还是旧账号，请先切换 Windows 默认浏览器或浏览器 Profile。</div>
+          <div class="add-account-desc" id="addPaneNewLoginDesc">CAS 会保存当前登录，完整关闭 Codex，再启动官方 codex login。登录成功后会自动导入账号并重新打开 Codex。</div>
           <button class="tool-btn primary add-account-action-btn" id="addAccountPrepareNewBtn" type="button">开始添加新账号</button>
         </div>
       </div>
@@ -290,7 +327,7 @@
   </div>
 
   <script src="./js/account-notes-seed.js"></script>
-  <script src="./js/app.js?v=20260621-notes-protect"></script>
+  <script src="./js/app.js?v=20260714-github-update"></script>
 </body>
 
 </html>
