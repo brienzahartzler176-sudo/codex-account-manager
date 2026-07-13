@@ -17,7 +17,7 @@
     "group.pro": "Pro",
     "table.account": "账号",
     "table.quota": "模型配额",
-    "table.recent": "最近使用",
+    "table.recent": "时间记录",
     "table.action": "操作",
     "settings.title": "轻量设置",
     "settings.subtitle": "只保留日常使用需要的基础选项。",
@@ -91,6 +91,20 @@
     "quota.remaining_5h": "5H",
     "quota.remaining_7d": "7D",
     "quota.reset_dynamic": "{window} 重置倒计时 {time}",
+    "quota.remaining_value": "剩余 {value}",
+    "quota.recovery_label": "额度恢复",
+    "quota.recovery_unknown": "官方未返回",
+    "quota.reset_count_label": "重置次数",
+    "quota.reset_count_value": "{count} 次",
+    "quota.reset_count_unknown": "未查询",
+    "quota.checked_just_now": "刚刚查询",
+    "quota.checked_minutes_ago": "{minutes} 分钟前查询",
+    "quota.checked_hours_ago": "{hours} 小时前查询",
+    "quota.checked_on": "{date} 查询",
+    "time.sync_label": "最近同步",
+    "time.first_added_label": "首次入库",
+    "time.managed_label": "已管理",
+    "time.plan_estimate_label": "订阅估算",
     "action.switch_title": "切换到此账号",
     "action.switch": "切换",
     "action.relogin_title": "重新登录并更新此账号凭证",
@@ -2212,18 +2226,17 @@
     return `${(Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, "")}%`;
   }
 
-  function formatHoursFromSeconds(v) {
+  function formatDurationFromSeconds(v) {
     const n = Number(v);
     if (!Number.isFinite(n) || n < 0) return "-";
-    return `${(n / 3600).toFixed(1)}小时`;
-  }
-
-  function formatDaysFromSeconds(v) {
-    const n = Number(v);
-    if (!Number.isFinite(n) || n < 0) return "-";
-    const days = n / 86400;
-    if (days >= 1) return `${days.toFixed(1)}天`;
-    return `${(n / 3600).toFixed(1)}小时`;
+    if (n < 60) return "即将恢复";
+    const totalMinutes = Math.max(1, Math.ceil(n / 60));
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) return `${days} 天${hours > 0 ? ` ${hours} 小时` : ""}后`;
+    if (hours > 0) return `${hours} 小时${minutes > 0 ? ` ${minutes} 分钟` : ""}后`;
+    return `${minutes} 分钟后`;
   }
 
   function parseCasTimestamp(value) {
@@ -2256,8 +2269,8 @@
     const date = parseCasTimestamp(value);
     if (!date) return "";
     const diff = Date.now() - date.getTime();
-    if (!Number.isFinite(diff) || diff < 0) return "已放 0 天";
-    return `已放 ${Math.floor(diff / 86400000)} 天`;
+    if (!Number.isFinite(diff) || diff < 0) return "0 天";
+    return `${Math.floor(diff / 86400000)} 天`;
   }
 
   function formatPlusRemainingDays(value, planType) {
@@ -2267,21 +2280,36 @@
     estimatedEndsAt.setDate(estimatedEndsAt.getDate() + 30);
     const remainingMs = estimatedEndsAt.getTime() - Date.now();
     if (remainingMs >= 0) {
-      return `Plus 估算剩 ${Math.ceil(remainingMs / 86400000)} 天`;
+      return `Plus 约剩 ${Math.ceil(remainingMs / 86400000)} 天`;
     }
-    return `Plus 估算已超 ${Math.max(1, Math.floor(Math.abs(remainingMs) / 86400000))} 天`;
-  }
-
-  function formatFirstAddedMeta(value, planType) {
-    const dateText = formatCasDateShort(value);
-    if (!dateText) return "";
-    return `首次入库 ${dateText} · ${formatDaysSince(value)}`;
+    return `Plus 约超 ${Math.max(1, Math.floor(Math.abs(remainingMs) / 86400000))} 天`;
   }
 
   function formatResetAvailableCount(value) {
     const n = toNonNegativeInteger(value);
-    if (n === null) return "可重置次数未知";
-    return `可重置 ${n} 次`;
+    if (n === null) return t("quota.reset_count_unknown");
+    return t("quota.reset_count_value", { count: n });
+  }
+
+  function formatQueryFreshness(value) {
+    const date = parseCasTimestamp(value);
+    if (!date) return t("quota.reset_count_unknown");
+    const diff = Math.max(0, Date.now() - date.getTime());
+    if (diff < 2 * 60 * 1000) return t("quota.checked_just_now");
+    if (diff < 60 * 60 * 1000) {
+      return t("quota.checked_minutes_ago", { minutes: Math.max(2, Math.floor(diff / 60000)) });
+    }
+    if (diff < 24 * 60 * 60 * 1000) {
+      return t("quota.checked_hours_ago", { hours: Math.max(1, Math.floor(diff / 3600000)) });
+    }
+    return t("quota.checked_on", { date: formatCasDateShort(value) || "-" });
+  }
+
+  function isQueryFresh(value) {
+    const date = parseCasTimestamp(value);
+    if (!date) return false;
+    const diff = Date.now() - date.getTime();
+    return diff >= 0 && diff < 60 * 60 * 1000;
   }
 
   function getQuotaResetCacheKey(item) {
@@ -2296,6 +2324,11 @@
   function getCachedQuotaResetAvailableCount(item) {
     const cached = state.quotaResetCountCache.get(getQuotaResetCacheKey(item));
     return toNonNegativeInteger(cached?.availableCount);
+  }
+
+  function getCachedQuotaResetUpdatedAt(item) {
+    const cached = state.quotaResetCountCache.get(getQuotaResetCacheKey(item));
+    return String(cached?.updatedAt || "").trim();
   }
 
   function refreshFirstAddedAtCache(options = {}) {
@@ -2339,7 +2372,10 @@
         for (const [key, value] of Object.entries(payload?.accounts || {})) {
           const availableCount = toNonNegativeInteger(value?.availableCount);
           if (availableCount !== null) {
-            nextCache.set(String(key).trim().toLowerCase(), { availableCount });
+            nextCache.set(String(key).trim().toLowerCase(), {
+              availableCount,
+              updatedAt: String(value?.updatedAt || "").trim()
+            });
           }
         }
         state.quotaResetCountCache = nextCache;
@@ -2483,17 +2519,40 @@
     return [...byWindow.values()].sort((a, b) => a.windowSeconds - b.windowSeconds);
   }
 
-  function renderQuotaBar(label, value) {
+  function formatQuotaWindowDisplayLabel(window) {
+    const seconds = Number(window?.windowSeconds);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      const days = seconds / 86400;
+      const hours = seconds / 3600;
+      if (days >= 1 && Math.abs(days - Math.round(days)) < 0.01) return `${Math.round(days)} 天额度`;
+      if (hours >= 1 && Math.abs(hours - Math.round(hours)) < 0.01) return `${Math.round(hours)} 小时额度`;
+    }
+    const fallback = String(window?.label || "额度").trim();
+    return fallback.includes("额度") ? fallback : `${fallback} 额度`;
+  }
+
+  function renderQuotaWindow(window) {
+    const label = formatQuotaWindowDisplayLabel(window);
+    const value = window?.remainingPercent;
     const n = toPercentNumber(value);
     const width = n === null ? 0 : Math.max(0, Math.min(100, n));
     const text = formatPercentValue(value);
+    const recoveryText = Number.isFinite(window?.resetAfterSeconds) && window.resetAfterSeconds >= 0
+      ? formatDurationFromSeconds(window.resetAfterSeconds)
+      : t("quota.recovery_unknown");
     return `
-      <div class="quota-bar-row ${escapeHtml(getQuotaLevelClass(value))}">
-        <span class="quota-bar-label">${escapeHtml(label)}</span>
+      <div class="quota-window ${escapeHtml(getQuotaLevelClass(value))}">
+        <div class="quota-window-head">
+          <span class="quota-window-label">${escapeHtml(label)}</span>
+          <span class="quota-window-value">${escapeHtml(t("quota.remaining_value", { value: text }))}</span>
+        </div>
         <div class="quota-bar-track" title="${escapeHtml(`${label} ${text}`)}">
           <div class="quota-bar-fill" style="width: ${width}%"></div>
         </div>
-        <span class="quota-bar-value">${escapeHtml(text)}</span>
+        <div class="quota-window-foot">
+          <span>${escapeHtml(t("quota.recovery_label"))}</span>
+          <strong>${escapeHtml(recoveryText)}</strong>
+        </div>
       </div>
     `;
   }
@@ -2694,7 +2753,8 @@
         JSON.stringify(Array.isArray(item.quotaWindows) ? item.quotaWindows : []),
         item.quota5hRemainingPercent,
         item.quota7dRemainingPercent,
-        item.quotaResetAvailableCount
+        item.quotaResetAvailableCount,
+        item.quotaResetCountUpdatedAt
       ].map((value) => String(value ?? "").trim()).join("|"))
       .join("\n");
   }
@@ -2807,28 +2867,23 @@
       const alias = name && email && name !== email ? `<span class="account-alias">昵称：${escapeHtml(name)}</span>` : "";
       const accountInitial = "C";
       const quotaWindows = getQuotaWindows(item);
-      const resetWindows = quotaWindows
-        .filter((window) => Number.isFinite(window.resetAfterSeconds) && window.resetAfterSeconds >= 0)
-        .sort((a, b) => a.resetAfterSeconds - b.resetAfterSeconds);
-      const nextResetWindow = resetWindows[0] || null;
-      const resetText = nextResetWindow
-        ? t("quota.reset_dynamic", {
-            window: nextResetWindow.label,
-            time: formatDaysFromSeconds(nextResetWindow.resetAfterSeconds)
-          })
-        : "";
-      const resetTitle = resetWindows
-        .map((window) => `${window.label} 重置倒计时：${formatHoursFromSeconds(window.resetAfterSeconds)}`)
-        .join("\n");
       const itemResetCount = toNonNegativeInteger(item.quotaResetAvailableCount);
       const cachedResetCount = getCachedQuotaResetAvailableCount(item);
       const effectiveResetCount = itemResetCount ?? cachedResetCount ?? null;
       const resetCountText = formatResetAvailableCount(effectiveResetCount);
       const resetCountKnown = effectiveResetCount !== null;
-      const resetCountHtml = `<span class="quota-reset-count${resetCountKnown ? "" : " unknown"}" title="可重置次数来自官方额度信息，仅作显示，不会触发重置">${escapeHtml(resetCountText)}</span>`;
+      const resetCountUpdatedAt = String(item.quotaResetCountUpdatedAt || getCachedQuotaResetUpdatedAt(item) || "").trim();
+      const resetCountFresh = isQueryFresh(resetCountUpdatedAt);
+      const resetCountHtml = `
+        <div class="quota-reset-row${resetCountFresh ? "" : " stale"}" title="显示官方上次查询结果；点击本行刷新可重新查询">
+          <span class="quota-meta-label">${escapeHtml(t("quota.reset_count_label"))}</span>
+          <strong class="quota-reset-count${resetCountKnown ? "" : " unknown"}">${escapeHtml(resetCountText)}</strong>
+          <span class="quota-reset-updated">${escapeHtml(formatQueryFreshness(resetCountUpdatedAt))}</span>
+        </div>`;
       const effectiveFirstAddedAt = String(item.firstAddedAt || getCachedFirstAddedAt(item) || "").trim();
-      const firstAddedMeta = formatFirstAddedMeta(effectiveFirstAddedAt, item.planType || item.group);
-      const firstAddedTitle = firstAddedMeta
+      const firstAddedDate = formatCasDateShort(effectiveFirstAddedAt);
+      const managedDays = formatDaysSince(effectiveFirstAddedAt);
+      const firstAddedTitle = firstAddedDate
         ? `首次进入 CAS：${effectiveFirstAddedAt}。Plus 剩余天数按首次进入 CAS + 30 天估算，不等同于官方订阅到期日。`
         : "";
       const plusEstimate = formatPlusRemainingDays(effectiveFirstAddedAt, item.planType || item.group);
@@ -2838,15 +2893,10 @@
       const primaryActionDisabled = state.switchProgressActive || (item.abnormal ? false : disableSwitchAction);
       const quotaBody = item.usageOk && !item.abnormal
         ? `
-          <div class="quota-head">
-            <span class="quota-name">${escapeHtml(t("quota.gpt"))}</span>
-            ${resetText ? `<span class="quota-reset" title="${escapeHtml(resetTitle)}">${escapeHtml(resetText)}</span>` : ""}
-            ${resetCountHtml}
-          </div>
           ${quotaWindows.length
-            ? `<div class="quota-bars">${quotaWindows.map((window) => renderQuotaBar(window.label, window.remainingPercent)).join("")}</div>`
+            ? `<div class="quota-windows">${quotaWindows.map((window) => renderQuotaWindow(window)).join("")}</div>`
             : `<div class="quota-placeholder">${escapeHtml(t("quota.no_window"))}</div>`}
-          ${plusEstimate ? `<div class="plan-estimate" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(plusEstimate)}</div>` : ""}
+          ${resetCountHtml}
         `
         : `<div class="quota-placeholder">${escapeHtml(item.abnormal ? getAccountIssueText(item) : (String(item.usageError || "").trim() || t("quota.placeholder")))}</div>`;
 
@@ -2872,8 +2922,12 @@
             </div>
           </td>
           <td>
-            <span class="recent-time" title="最近同步时间">${escapeHtml(item.updatedAt || "-")}</span>
-            ${firstAddedMeta ? `<span class="recent-first" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(firstAddedMeta)}</span>` : ""}
+            <div class="time-records">
+              <div class="time-record-row primary"><span class="time-record-label">${escapeHtml(t("time.sync_label"))}</span><span class="time-record-value">${escapeHtml(item.updatedAt || "-")}</span></div>
+              <div class="time-record-row"><span class="time-record-label">${escapeHtml(t("time.first_added_label"))}</span><span class="time-record-value">${escapeHtml(firstAddedDate || "-")}</span></div>
+              <div class="time-record-row"><span class="time-record-label">${escapeHtml(t("time.managed_label"))}</span><span class="time-record-value">${escapeHtml(managedDays || "-")}</span></div>
+              ${plusEstimate ? `<div class="time-record-row estimate" title="${escapeHtml(firstAddedTitle)}"><span class="time-record-label">${escapeHtml(t("time.plan_estimate_label"))}</span><span class="time-record-value">${escapeHtml(plusEstimate)}</span></div>` : ""}
+            </div>
           </td>
           <td class="actions-col">
             <div class="actions">

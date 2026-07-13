@@ -1271,44 +1271,67 @@ button:disabled {
   display: grid;
   width: 100%;
   min-width: 0;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
 }
 
-.quota-head {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+.quota-windows {
+  display: grid;
   gap: 10px;
   min-width: 0;
 }
 
-.quota-name {
-  display: none;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--primary);
-  font-family: var(--font-body);
+.quota-window {
+  min-width: 0;
+}
+
+.quota-window + .quota-window {
+  padding-top: 10px;
+  border-top: 1px solid #edf0f4;
+}
+
+.quota-window-head,
+.quota-window-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.quota-window-label {
+  color: #374151;
   font-weight: 600;
 }
 
-.quota-reset {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.quota-window-value {
+  flex: 0 0 auto;
+  color: #059669;
+  font-weight: 600;
   white-space: nowrap;
-  color: #64748b;
-  font-family: var(--font-mono);
+}
+
+.quota-window.mid .quota-window-value {
+  color: #b45309;
+}
+
+.quota-window.low .quota-window-value {
+  color: #dc2626;
+}
+
+.quota-window-foot {
+  margin-top: 5px;
+  white-space: nowrap;
+  color: #6b7280;
   font-size: 12px;
 }
 
-.quota-bars {
-  display: grid;
-  gap: 13px;
-  min-width: 0;
+.quota-window-foot strong {
+  overflow: hidden;
+  color: #4b5563;
+  font-weight: 500;
+  text-overflow: ellipsis;
 }
 
 .quota-bar-row {
@@ -1332,6 +1355,7 @@ button:disabled {
 
 .quota-bar-track {
   height: 5px;
+  margin-top: 7px;
   overflow: hidden;
   border: 0;
   border-radius: 999px;
@@ -1345,15 +1369,18 @@ button:disabled {
   background: var(--success);
 }
 
-.quota-bar-row.high .quota-bar-fill {
+.quota-bar-row.high .quota-bar-fill,
+.quota-window.high .quota-bar-fill {
   background: var(--success);
 }
 
-.quota-bar-row.mid .quota-bar-fill {
-  background: var(--success);
+.quota-bar-row.mid .quota-bar-fill,
+.quota-window.mid .quota-bar-fill {
+  background: #d97706;
 }
 
-.quota-bar-row.low .quota-bar-fill {
+.quota-bar-row.low .quota-bar-fill,
+.quota-window.low .quota-bar-fill {
   background: var(--danger);
 }
 
@@ -1363,6 +1390,34 @@ button:disabled {
 
 .quota-bar-row.empty {
   opacity: 0.62;
+}
+
+.quota-reset-row {
+  display: grid;
+  grid-template-columns: 68px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 9px;
+  border-top: 1px solid #dfe5ec;
+}
+
+.quota-meta-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.quota-reset-updated {
+  overflow: hidden;
+  color: #6b7280;
+  font-size: 11px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quota-reset-row.stale .quota-reset-updated {
+  color: #b45309;
 }
 
 .quota-placeholder {
@@ -1377,6 +1432,51 @@ button:disabled {
   color: #374151;
   font-size: 15px;
   white-space: nowrap;
+}
+
+.time-records {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.time-record-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.time-record-label {
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.time-record-value {
+  min-width: 0;
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.time-record-row.primary .time-record-value {
+  color: #111827;
+  font-weight: 600;
+}
+
+.time-record-row.estimate {
+  margin-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid #edf0f4;
+}
+
+.time-record-row.estimate .time-record-value {
+  color: #0f766e;
+  font-weight: 600;
 }
 
 .recent-device {
@@ -2147,20 +2247,20 @@ button:disabled {
 
 /* === 可重置次数 / Plus 估算剩余天数 / 首次入库 === */
 .quota-reset-count {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 1px 6px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
   color: #047857;
-  background: rgba(16, 185, 129, 0.12);
+  background: transparent;
   white-space: nowrap;
 }
 
 .quota-reset-count.unknown {
   color: #6b7280;
-  background: rgba(107, 114, 128, 0.12);
+  background: transparent;
 }
 
 .recent-first {

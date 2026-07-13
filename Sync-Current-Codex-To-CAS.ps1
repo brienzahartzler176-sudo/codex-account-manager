@@ -181,6 +181,7 @@ function Clear-UsageFields {
   Set-JsonProp $Entry "quota5hWindowSeconds" -1
   Set-JsonProp $Entry "quota7dWindowSeconds" -1
   Remove-JsonProp $Entry "quotaResetAvailableCount"
+  Remove-JsonProp $Entry "quotaResetCountUpdatedAt"
 }
 
 function Apply-UsageResultToEntry {
@@ -205,6 +206,7 @@ function Apply-UsageResultToEntry {
   Set-JsonProp $Entry "quota7dWindowSeconds" ([int64]$Usage.w7s)
   if ([int]$Usage.resetAvailableCount -ge 0) {
     Set-JsonProp $Entry "quotaResetAvailableCount" ([int]$Usage.resetAvailableCount)
+    Set-JsonProp $Entry "quotaResetCountUpdatedAt" (Get-Date -Format "yyyy/MM/dd HH:mm:ss")
   }
 }
 
@@ -230,6 +232,27 @@ function Update-QuotaWindowCache {
   } else {
     Remove-JsonProp $cache $normalizedKey
   }
+  Write-Utf8NoBomFile -Path $Path -Text ($cache | ConvertTo-Json -Depth 12)
+}
+
+function Update-QuotaResetCountCache {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Key,
+    $Usage
+  )
+  if ([string]::IsNullOrWhiteSpace($Key) -or $null -eq $Usage -or -not $Usage.ok) { return }
+  if ([int]$Usage.resetAvailableCount -lt 0) { return }
+
+  $cache = [pscustomobject]@{}
+  if (Test-Path -LiteralPath $Path) {
+    try { $cache = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $cache = [pscustomobject]@{} }
+  }
+  $normalizedKey = $Key.Trim().ToLowerInvariant()
+  Set-JsonProp $cache $normalizedKey ([pscustomobject][ordered]@{
+    availableCount = [int]$Usage.resetAvailableCount
+    updatedAt = (Get-Date -Format "yyyy/MM/dd HH:mm:ss")
+  })
   Write-Utf8NoBomFile -Path $Path -Text ($cache | ConvertTo-Json -Depth 12)
 }
 
@@ -581,6 +604,7 @@ try {
   $indexPath = Join-Path $backupRoot "index.json"
   $configPath = Join-Path $dataRoot "config.json"
   $quotaWindowCachePath = Join-Path $dataRoot "quota-window-cache.json"
+  $quotaResetCountCachePath = Join-Path $dataRoot "quota-reset-count-cache.json"
   $codexAuth = if ([string]::IsNullOrWhiteSpace($AuthPath)) {
     Join-Path $HOME ".codex\auth.json"
   } else {
@@ -639,6 +663,7 @@ try {
     if ($storedUsage.ok) {
       Apply-UsageResultToEntry -Entry $target[0] -Usage $storedUsage
       Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $storedKey -Usage $storedUsage
+      Update-QuotaResetCountCache -Path $quotaResetCountCachePath -Key $storedKey -Usage $storedUsage
     } elseif ([int]$storedUsage.status -eq 401) {
       Set-JsonProp $target[0] "abnormal" $true
       Set-JsonProp $target[0] "abnormalReason" "usage_refresh_failed"
@@ -757,6 +782,7 @@ try {
   if ($usage.ok) {
     Apply-UsageResultToEntry -Entry $entry -Usage $usage
     Update-QuotaWindowCache -Path $quotaWindowCachePath -Key $canonicalEmail -Usage $usage
+    Update-QuotaResetCountCache -Path $quotaResetCountCachePath -Key $canonicalEmail -Usage $usage
   } elseif (-not $NoUsage -and [int]$usage.status -eq 401) {
     Set-JsonProp $entry "abnormal" $true
     Set-JsonProp $entry "abnormalReason" "usage_refresh_failed"
