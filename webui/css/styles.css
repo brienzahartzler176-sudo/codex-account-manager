@@ -1271,41 +1271,67 @@ button:disabled {
   display: grid;
   width: 100%;
   min-width: 0;
-  gap: 7px;
+  gap: 8px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 14px;
+}
+
+.quota-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.quota-name {
+  display: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--primary);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.quota-reset {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #2563eb;
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
 .quota-bars {
   display: grid;
-  gap: 8px;
+  gap: 13px;
   min-width: 0;
 }
 
 .quota-bar-row {
   display: grid;
-  grid-template-columns: 58px minmax(72px, 1fr) 38px;
+  grid-template-columns: 30px minmax(150px, 260px) 48px;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   min-width: 0;
 }
 
 .quota-bar-label,
 .quota-bar-value {
-  color: #4b5563;
-  font-size: 12px;
+  color: #475569;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .quota-bar-value {
   text-align: right;
-  color: #059669;
+  color: var(--success);
 }
 
 .quota-bar-track {
   height: 5px;
-  margin: 0;
   overflow: hidden;
   border: 0;
   border-radius: 999px;
@@ -1327,12 +1353,12 @@ button:disabled {
   background: #d97706;
 }
 
-.quota-bar-row.low .quota-bar-fill {
-  background: var(--danger);
-}
-
 .quota-bar-row.mid .quota-bar-value {
   color: #b45309;
+}
+
+.quota-bar-row.low .quota-bar-fill {
+  background: var(--danger);
 }
 
 .quota-bar-row.low .quota-bar-value {
@@ -1343,40 +1369,6 @@ button:disabled {
   opacity: 0.62;
 }
 
-.quota-meta-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-.quota-reset {
-  min-width: 0;
-  overflow: hidden;
-  color: #64748b;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quota-count-group {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.quota-reset-updated {
-  color: #94a3b8;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.quota-meta-row.stale .quota-reset-updated {
-  color: #b45309;
-}
-
 .quota-placeholder {
   color: var(--muted);
   overflow-wrap: anywhere;
@@ -1385,40 +1377,10 @@ button:disabled {
 }
 
 .recent-time {
-  display: block;
+  display: inline-block;
   color: #111827;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.45;
-  white-space: normal;
-}
-
-.recent-stack {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.recent-first {
-  display: block;
-  margin: 0;
-  color: #64748b;
-  font-size: 11px;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
-.recent-first strong {
-  color: #475569;
-  font-weight: 600;
-}
-
-.recent-managed {
-  display: block;
-  color: #2563eb;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.45;
+  font-size: 15px;
+  white-space: nowrap;
 }
 
 .recent-device {
@@ -2189,35 +2151,35 @@ button:disabled {
 
 /* === 可重置次数 / Plus 估算剩余天数 / 首次入库 === */
 .quota-reset-count {
-  display: inline;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
   color: #047857;
-  background: transparent;
+  background: rgba(16, 185, 129, 0.12);
   white-space: nowrap;
 }
 
 .quota-reset-count.unknown {
   color: #6b7280;
-  background: transparent;
+  background: rgba(107, 114, 128, 0.12);
 }
 
 .recent-first {
   display: block;
-  margin: 0;
+  margin-top: 4px;
   color: #64748b;
-  font-size: 11px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.35;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
 .plan-estimate {
   display: block;
-  margin: 0;
+  margin-top: 6px;
   color: #0f766e;
   font-size: 12px;
   font-weight: 600;
