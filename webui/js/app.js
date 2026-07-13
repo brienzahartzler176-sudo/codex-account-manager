@@ -17,7 +17,7 @@
     "group.pro": "Pro",
     "table.account": "账号",
     "table.quota": "模型配额",
-    "table.recent": "时间记录",
+    "table.recent": "账号记录",
     "table.action": "操作",
     "settings.title": "轻量设置",
     "settings.subtitle": "只保留日常使用需要的基础选项。",
@@ -95,12 +95,12 @@
     "quota.recovery_label": "额度恢复",
     "quota.recovery_unknown": "官方未返回",
     "quota.reset_count_label": "重置次数",
-    "quota.reset_count_value": "{count} 次",
-    "quota.reset_count_unknown": "未查询",
-    "quota.checked_just_now": "刚刚查询",
-    "quota.checked_minutes_ago": "{minutes} 分钟前查询",
-    "quota.checked_hours_ago": "{hours} 小时前查询",
-    "quota.checked_on": "{date} 查询",
+    "quota.reset_count_value": "可重置 {count} 次",
+    "quota.reset_count_unknown": "次数未知",
+    "quota.checked_just_now": "刚刚",
+    "quota.checked_minutes_ago": "{minutes} 分钟前",
+    "quota.checked_hours_ago": "{hours} 小时前",
+    "quota.checked_on": "{date}",
     "time.sync_label": "最近同步",
     "time.first_added_label": "首次入库",
     "time.managed_label": "已管理",
@@ -2537,22 +2537,13 @@
     const n = toPercentNumber(value);
     const width = n === null ? 0 : Math.max(0, Math.min(100, n));
     const text = formatPercentValue(value);
-    const recoveryText = Number.isFinite(window?.resetAfterSeconds) && window.resetAfterSeconds >= 0
-      ? formatDurationFromSeconds(window.resetAfterSeconds)
-      : t("quota.recovery_unknown");
     return `
-      <div class="quota-window ${escapeHtml(getQuotaLevelClass(value))}">
-        <div class="quota-window-head">
-          <span class="quota-window-label">${escapeHtml(label)}</span>
-          <span class="quota-window-value">${escapeHtml(t("quota.remaining_value", { value: text }))}</span>
-        </div>
+      <div class="quota-bar-row ${escapeHtml(getQuotaLevelClass(value))}">
+        <span class="quota-bar-label">${escapeHtml(label)}</span>
         <div class="quota-bar-track" title="${escapeHtml(`${label} ${text}`)}">
           <div class="quota-bar-fill" style="width: ${width}%"></div>
         </div>
-        <div class="quota-window-foot">
-          <span>${escapeHtml(t("quota.recovery_label"))}</span>
-          <strong>${escapeHtml(recoveryText)}</strong>
-        </div>
+        <span class="quota-bar-value">${escapeHtml(text)}</span>
       </div>
     `;
   }
@@ -2867,6 +2858,16 @@
       const alias = name && email && name !== email ? `<span class="account-alias">昵称：${escapeHtml(name)}</span>` : "";
       const accountInitial = "C";
       const quotaWindows = getQuotaWindows(item);
+      const resetWindows = quotaWindows
+        .filter((window) => Number.isFinite(window.resetAfterSeconds) && window.resetAfterSeconds >= 0)
+        .sort((a, b) => a.resetAfterSeconds - b.resetAfterSeconds);
+      const nextResetWindow = resetWindows[0] || null;
+      const resetTimeText = nextResetWindow
+        ? `${formatDurationFromSeconds(nextResetWindow.resetAfterSeconds)}重置`
+        : "重置时间未知";
+      const resetTimeTitle = resetWindows
+        .map((window) => `${formatQuotaWindowDisplayLabel(window)}：${formatDurationFromSeconds(window.resetAfterSeconds)}重置`)
+        .join("\n");
       const itemResetCount = toNonNegativeInteger(item.quotaResetAvailableCount);
       const cachedResetCount = getCachedQuotaResetAvailableCount(item);
       const effectiveResetCount = itemResetCount ?? cachedResetCount ?? null;
@@ -2875,10 +2876,12 @@
       const resetCountUpdatedAt = String(item.quotaResetCountUpdatedAt || getCachedQuotaResetUpdatedAt(item) || "").trim();
       const resetCountFresh = isQueryFresh(resetCountUpdatedAt);
       const resetCountHtml = `
-        <div class="quota-reset-row${resetCountFresh ? "" : " stale"}" title="显示官方上次查询结果；点击本行刷新可重新查询">
-          <span class="quota-meta-label">${escapeHtml(t("quota.reset_count_label"))}</span>
-          <strong class="quota-reset-count${resetCountKnown ? "" : " unknown"}">${escapeHtml(resetCountText)}</strong>
-          <span class="quota-reset-updated">${escapeHtml(formatQueryFreshness(resetCountUpdatedAt))}</span>
+        <div class="quota-meta-row${resetCountFresh ? "" : " stale"}">
+          <span class="quota-reset" title="${escapeHtml(resetTimeTitle || resetTimeText)}">${escapeHtml(resetTimeText)}</span>
+          <span class="quota-count-group" title="官方次数上次查询时间：${escapeHtml(resetCountUpdatedAt || "未查询")}。点击本行刷新可重新查询。">
+            <strong class="quota-reset-count${resetCountKnown ? "" : " unknown"}">${escapeHtml(resetCountText)}</strong>
+            <span class="quota-reset-updated">${escapeHtml(formatQueryFreshness(resetCountUpdatedAt))}</span>
+          </span>
         </div>`;
       const effectiveFirstAddedAt = String(item.firstAddedAt || getCachedFirstAddedAt(item) || "").trim();
       const firstAddedDate = formatCasDateShort(effectiveFirstAddedAt);
@@ -2894,9 +2897,10 @@
       const quotaBody = item.usageOk && !item.abnormal
         ? `
           ${quotaWindows.length
-            ? `<div class="quota-windows">${quotaWindows.map((window) => renderQuotaWindow(window)).join("")}</div>`
+            ? `<div class="quota-bars">${quotaWindows.map((window) => renderQuotaWindow(window)).join("")}</div>`
             : `<div class="quota-placeholder">${escapeHtml(t("quota.no_window"))}</div>`}
           ${resetCountHtml}
+          ${plusEstimate ? `<div class="plan-estimate" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(plusEstimate)}</div>` : ""}
         `
         : `<div class="quota-placeholder">${escapeHtml(item.abnormal ? getAccountIssueText(item) : (String(item.usageError || "").trim() || t("quota.placeholder")))}</div>`;
 
@@ -2922,11 +2926,10 @@
             </div>
           </td>
           <td>
-            <div class="time-records">
-              <div class="time-record-row primary"><span class="time-record-label">${escapeHtml(t("time.sync_label"))}</span><span class="time-record-value">${escapeHtml(item.updatedAt || "-")}</span></div>
-              <div class="time-record-row"><span class="time-record-label">${escapeHtml(t("time.first_added_label"))}</span><span class="time-record-value">${escapeHtml(firstAddedDate || "-")}</span></div>
-              <div class="time-record-row"><span class="time-record-label">${escapeHtml(t("time.managed_label"))}</span><span class="time-record-value">${escapeHtml(managedDays || "-")}</span></div>
-              ${plusEstimate ? `<div class="time-record-row estimate" title="${escapeHtml(firstAddedTitle)}"><span class="time-record-label">${escapeHtml(t("time.plan_estimate_label"))}</span><span class="time-record-value">${escapeHtml(plusEstimate)}</span></div>` : ""}
+            <div class="recent-stack">
+              <span class="recent-time" title="最近同步时间">${escapeHtml(item.updatedAt || "-")}</span>
+              ${firstAddedDate ? `<span class="recent-first" title="${escapeHtml(firstAddedTitle)}">首次入库 <strong>${escapeHtml(firstAddedDate)}</strong></span>` : ""}
+              ${managedDays ? `<span class="recent-managed">已管理 ${escapeHtml(managedDays)}</span>` : ""}
             </div>
           </td>
           <td class="actions-col">
