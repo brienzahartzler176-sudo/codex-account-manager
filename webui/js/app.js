@@ -90,7 +90,7 @@
     "quota.reset_free_title": "7D 重置倒计时 {r7}",
     "quota.remaining_5h": "5H",
     "quota.remaining_7d": "7D",
-    "quota.reset_dynamic": "{window} 重置倒计时 {time}",
+    "quota.reset_dynamic": "重置倒计时 {time}",
     "action.switch_title": "切换到此账号",
     "action.switch": "切换",
     "action.relogin_title": "重新登录并更新此账号凭证",
@@ -2252,32 +2252,6 @@
     return `${date.getFullYear()}/${month}/${day}`;
   }
 
-  function formatDaysSince(value) {
-    const date = parseCasTimestamp(value);
-    if (!date) return "";
-    const diff = Date.now() - date.getTime();
-    if (!Number.isFinite(diff) || diff < 0) return "已放 0 天";
-    return `已放 ${Math.floor(diff / 86400000)} 天`;
-  }
-
-  function formatPlusRemainingDays(value, planType) {
-    const date = parseCasTimestamp(value);
-    if (!date || normalizePlanType(planType) !== "plus") return "";
-    const estimatedEndsAt = new Date(date.getTime());
-    estimatedEndsAt.setDate(estimatedEndsAt.getDate() + 30);
-    const remainingMs = estimatedEndsAt.getTime() - Date.now();
-    if (remainingMs >= 0) {
-      return `Plus 估算剩 ${Math.ceil(remainingMs / 86400000)} 天`;
-    }
-    return `Plus 估算已超 ${Math.max(1, Math.floor(Math.abs(remainingMs) / 86400000))} 天`;
-  }
-
-  function formatFirstAddedMeta(value, planType) {
-    const dateText = formatCasDateShort(value);
-    if (!dateText) return "";
-    return `首次入库 ${dateText} · ${formatDaysSince(value)}`;
-  }
-
   function formatResetAvailableCount(value) {
     const n = toNonNegativeInteger(value);
     if (n === null) return "可重置次数未知";
@@ -2831,11 +2805,11 @@
         : "官方查询时间未知；点击本行刷新可重新查询。";
       const resetCountHtml = `<span class="quota-reset-count${resetCountKnown ? "" : " unknown"}" title="${escapeHtml(resetCountTitle)}">${escapeHtml(resetCountText)}</span>`;
       const effectiveFirstAddedAt = String(item.firstAddedAt || getCachedFirstAddedAt(item) || "").trim();
-      const firstAddedMeta = formatFirstAddedMeta(effectiveFirstAddedAt, item.planType || item.group);
-      const firstAddedTitle = firstAddedMeta
-        ? `首次进入 CAS：${effectiveFirstAddedAt}。Plus 剩余天数按首次进入 CAS + 30 天估算，不等同于官方订阅到期日。`
+      const firstAddedDate = formatCasDateShort(effectiveFirstAddedAt);
+      const firstAddedText = firstAddedDate ? `入库时间 ${firstAddedDate}` : "";
+      const firstAddedTitle = firstAddedDate
+        ? `首次进入 CAS：${effectiveFirstAddedAt}。`
         : "";
-      const plusEstimate = formatPlusRemainingDays(effectiveFirstAddedAt, item.planType || item.group);
       const primaryAction = item.abnormal ? "reauth" : "switch";
       const primaryActionTitle = item.abnormal ? t("action.relogin_title") : t("action.switch_title");
       const primaryActionLabel = item.abnormal ? t("action.relogin") : t("action.switch");
@@ -2850,7 +2824,7 @@
           ${quotaWindows.length
             ? `<div class="quota-bars">${quotaWindows.map((window) => renderQuotaBar(window.label, window.remainingPercent)).join("")}</div>`
             : `<div class="quota-placeholder">${escapeHtml(t("quota.no_window"))}</div>`}
-          ${plusEstimate ? `<div class="plan-estimate" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(plusEstimate)}</div>` : ""}
+          ${firstAddedText ? `<div class="account-added-date" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(firstAddedText)}</div>` : ""}
         `
         : `<div class="quota-placeholder">${escapeHtml(item.abnormal ? getAccountIssueText(item) : (String(item.usageError || "").trim() || t("quota.placeholder")))}</div>`;
 
@@ -2877,7 +2851,6 @@
           </td>
           <td>
             <span class="recent-time" title="最近同步时间">${escapeHtml(item.updatedAt || "-")}</span>
-            ${firstAddedMeta ? `<span class="recent-first" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(firstAddedMeta)}</span>` : ""}
           </td>
           <td class="actions-col">
             <div class="actions">

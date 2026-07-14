@@ -2167,17 +2167,7 @@ button:disabled {
   background: rgba(107, 114, 128, 0.12);
 }
 
-.recent-first {
-  display: block;
-  margin-top: 4px;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.35;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.plan-estimate {
+.account-added-date {
   display: block;
   margin-top: 6px;
   color: #0f766e;

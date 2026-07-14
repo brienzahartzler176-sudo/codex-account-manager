@@ -87,7 +87,7 @@
   "quota.reset_free_title": "7D 重置倒计时 {r7}",
   "quota.remaining_5h": "5H",
   "quota.remaining_7d": "7D",
-  "quota.reset_dynamic": "{window} 重置倒计时 {time}",
+  "quota.reset_dynamic": "重置倒计时 {time}",
   "action.switch_title": "切换到此账号",
   "action.switch": "切换",
   "action.relogin_title": "重新登录并更新此账号凭证",
