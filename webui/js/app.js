@@ -280,7 +280,6 @@
     accountsSectionTitle: document.getElementById("accountsSectionTitle"),
     thAccount: document.getElementById("thAccount"),
     thQuota: document.getElementById("thQuota"),
-    thRecent: document.getElementById("thRecent"),
     thAction: document.getElementById("thAction"),
     accountsBody: document.getElementById("accountsBody"),
     accountsPagination: document.getElementById("accountsPagination"),
@@ -2072,7 +2071,6 @@
     if (dom.groupProBtn) dom.groupProBtn.textContent = t("group.pro");
     if (dom.thAccount) dom.thAccount.textContent = t("table.account");
     if (dom.thQuota) dom.thQuota.textContent = t("table.quota");
-    if (dom.thRecent) dom.thRecent.textContent = t("table.recent");
     if (dom.thAction) dom.thAction.textContent = t("table.action");
     if (dom.settingsTitle) dom.settingsTitle.textContent = t("settings.title");
     if (dom.settingsSub) dom.settingsSub.textContent = t("settings.subtitle");
@@ -2250,18 +2248,6 @@
     const elapsedMs = Date.now() - date.getTime();
     if (!Number.isFinite(elapsedMs)) return null;
     return Math.max(0, Math.floor(elapsedMs / 86400000));
-  }
-
-  function formatRecentTimeShort(value) {
-    const raw = String(value || "").trim();
-    if (!raw) return "-";
-    const date = parseCasTimestamp(raw);
-    if (!date) return raw;
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${month}/${day} ${hours}:${minutes}`;
   }
 
   function formatResetAvailableCount(value) {
@@ -2767,7 +2753,7 @@
     applyCountText();
 
     if (!state.filteredAccounts.length) {
-      dom.accountsBody.innerHTML = `<tr><td colspan="4" class="table-empty-cell">${escapeHtml(t("accounts.empty"))}</td></tr>`;
+      dom.accountsBody.innerHTML = `<tr><td colspan="3" class="table-empty-cell">${escapeHtml(t("accounts.empty"))}</td></tr>`;
       return;
     }
 
@@ -2822,7 +2808,10 @@
       const firstAddedTitle = firstAddedDays !== null
         ? `首次进入 CAS：${effectiveFirstAddedAt}。按入库天数估算 Plus 周期，不等同于官方订阅到期日。`
         : "";
-      const recentTimeText = formatRecentTimeShort(item.updatedAt);
+      const accountTitle = [
+        email || name,
+        item.updatedAt ? `最近使用：${item.updatedAt}` : ""
+      ].filter(Boolean).join("\n");
       const primaryAction = item.abnormal ? "reauth" : "switch";
       const primaryActionTitle = item.abnormal ? t("action.relogin_title") : t("action.switch_title");
       const primaryActionLabel = item.abnormal ? t("action.relogin") : t("action.switch");
@@ -2844,7 +2833,7 @@
       return `
         <tr>
           <td>
-            <div class="account-cell" title="${escapeHtml(email || name)}">
+            <div class="account-cell" title="${escapeHtml(accountTitle)}">
               <span class="account-avatar ${item.abnormal ? "danger" : (item.isCurrent ? "current" : "")}">${escapeHtml(accountInitial)}</span>
               <span class="account-main">
                 <span class="account-name">${escapeHtml(email || name || "-")}</span>
@@ -2861,9 +2850,6 @@
             <div class="quota-box">
               ${quotaBody}
             </div>
-          </td>
-          <td>
-            <span class="recent-time" title="${escapeHtml(item.updatedAt ? `完整时间：${item.updatedAt}` : "最近使用时间")}">${escapeHtml(recentTimeText)}</span>
           </td>
           <td class="actions-col">
             <div class="actions">

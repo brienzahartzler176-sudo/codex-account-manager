@@ -1376,33 +1376,6 @@ button:disabled {
   line-height: 1.5;
 }
 
-.recent-time {
-  display: inline-block;
-  color: #111827;
-  font-size: 15px;
-  white-space: nowrap;
-}
-
-.recent-device {
-  display: inline-block;
-  width: 18px;
-  height: 14px;
-  margin-left: 12px;
-  border: 1.5px solid #4b5563;
-  border-radius: 2px;
-  vertical-align: -2px;
-}
-
-.recent-device::after {
-  content: "";
-  display: block;
-  width: 7px;
-  height: 1.5px;
-  margin: 14px auto 0;
-  background: #4b5563;
-  box-shadow: 0 2px 0 #4b5563;
-}
-
 .actions {
   display: flex;
   flex-wrap: nowrap;
