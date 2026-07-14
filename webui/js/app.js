@@ -2244,12 +2244,24 @@
     return Math.trunc(n);
   }
 
-  function formatCasDateShort(value) {
+  function formatDaysSince(value) {
     const date = parseCasTimestamp(value);
-    if (!date) return "";
+    if (!date) return null;
+    const elapsedMs = Date.now() - date.getTime();
+    if (!Number.isFinite(elapsedMs)) return null;
+    return Math.max(0, Math.floor(elapsedMs / 86400000));
+  }
+
+  function formatRecentTimeShort(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "-";
+    const date = parseCasTimestamp(raw);
+    if (!date) return raw;
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${date.getFullYear()}/${month}/${day}`;
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${month}/${day} ${hours}:${minutes}`;
   }
 
   function formatResetAvailableCount(value) {
@@ -2805,11 +2817,12 @@
         : "官方查询时间未知；点击本行刷新可重新查询。";
       const resetCountHtml = `<span class="quota-reset-count${resetCountKnown ? "" : " unknown"}" title="${escapeHtml(resetCountTitle)}">${escapeHtml(resetCountText)}</span>`;
       const effectiveFirstAddedAt = String(item.firstAddedAt || getCachedFirstAddedAt(item) || "").trim();
-      const firstAddedDate = formatCasDateShort(effectiveFirstAddedAt);
-      const firstAddedText = firstAddedDate ? `入库时间 ${firstAddedDate}` : "";
-      const firstAddedTitle = firstAddedDate
-        ? `首次进入 CAS：${effectiveFirstAddedAt}。`
+      const firstAddedDays = formatDaysSince(effectiveFirstAddedAt);
+      const firstAddedText = firstAddedDays === null ? "" : `已入库 ${firstAddedDays} 天`;
+      const firstAddedTitle = firstAddedDays !== null
+        ? `首次进入 CAS：${effectiveFirstAddedAt}。按入库天数估算 Plus 周期，不等同于官方订阅到期日。`
         : "";
+      const recentTimeText = formatRecentTimeShort(item.updatedAt);
       const primaryAction = item.abnormal ? "reauth" : "switch";
       const primaryActionTitle = item.abnormal ? t("action.relogin_title") : t("action.switch_title");
       const primaryActionLabel = item.abnormal ? t("action.relogin") : t("action.switch");
@@ -2824,7 +2837,7 @@
           ${quotaWindows.length
             ? `<div class="quota-bars">${quotaWindows.map((window) => renderQuotaBar(window.label, window.remainingPercent)).join("")}</div>`
             : `<div class="quota-placeholder">${escapeHtml(t("quota.no_window"))}</div>`}
-          ${firstAddedText ? `<div class="account-added-date" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(firstAddedText)}</div>` : ""}
+          ${firstAddedText ? `<div class="account-added-days" title="${escapeHtml(firstAddedTitle)}">${escapeHtml(firstAddedText)}</div>` : ""}
         `
         : `<div class="quota-placeholder">${escapeHtml(item.abnormal ? getAccountIssueText(item) : (String(item.usageError || "").trim() || t("quota.placeholder")))}</div>`;
 
@@ -2850,7 +2863,7 @@
             </div>
           </td>
           <td>
-            <span class="recent-time" title="最近同步时间">${escapeHtml(item.updatedAt || "-")}</span>
+            <span class="recent-time" title="${escapeHtml(item.updatedAt ? `完整时间：${item.updatedAt}` : "最近使用时间")}">${escapeHtml(recentTimeText)}</span>
           </td>
           <td class="actions-col">
             <div class="actions">
